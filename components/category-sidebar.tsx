@@ -77,16 +77,30 @@ export function CategorySidebar({ className }: CategorySidebarProps) {
                 <div key={category.name} className="space-y-1">
                   <Button
                     variant={activeCategory === category.name ? "secondary" : "ghost"}
-                    className="w-full justify-start gap-2"
+                    className={cn(
+                      "w-full justify-start gap-2 transition-all duration-200",
+                      activeCategory === category.name
+                        ? "dark:bg-primary/20 dark:hover:bg-primary/30 shadow-sm dark:shadow-primary/10"
+                        : "dark:hover:bg-primary/10"
+                    )}
                     onClick={() => setActiveCategory(activeCategory === category.name ? null : category.name)}
                   >
-                    <category.icon className="h-4 w-4" />
+                    <category.icon className={cn(
+                      "h-4 w-4 transition-colors duration-200",
+                      activeCategory === category.name
+                        ? "text-primary"
+                        : "text-muted-foreground group-hover:text-primary"
+                    )} />
                     {category.name}
                   </Button>
                   {activeCategory === category.name && (
-                    <div className="ml-6 space-y-1">
+                    <div className="ml-6 space-y-1 animate-in slide-in-from-left-2 duration-200">
                       {category.subcategories.map((sub) => (
-                        <Button key={sub} variant="ghost" className="w-full justify-start text-sm font-normal">
+                        <Button 
+                          key={sub} 
+                          variant="ghost" 
+                          className="w-full justify-start text-sm font-normal hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors"
+                        >
                           {sub}
                         </Button>
                       ))}

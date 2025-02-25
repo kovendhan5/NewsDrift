@@ -93,8 +93,8 @@ export function CategoryContent({ id }: CategoryContentProps) {
         <CardContent>
           <p className="text-muted-foreground mb-4">{category.description}</p>
           <div className="flex flex-wrap gap-4">
-            <div className="bg-primary/10 px-3 py-1 rounded-full text-sm">{category.articleCount} Articles</div>
-            <div className="bg-secondary/10 px-3 py-1 rounded-full text-sm">{category.podcastCount} Podcasts</div>
+            <div className="bg-primary/10 dark:bg-primary/20 px-3 py-1 rounded-full text-sm">{category.articleCount} Articles</div>
+            <div className="bg-secondary/10 dark:bg-secondary/20 px-3 py-1 rounded-full text-sm">{category.podcastCount} Podcasts</div>
           </div>
         </CardContent>
       </Card>

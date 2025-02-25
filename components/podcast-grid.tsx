@@ -201,32 +201,21 @@ export function PodcastGrid({ type }: PodcastGridProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
       {podcasts.map((podcast) => (
-        <Card key={podcast.id} className="overflow-hidden group hover:shadow-md dark:hover:shadow-primary/5 transition-all border dark:border-border/60">
+        <Card key={podcast.id} className="overflow-hidden group hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-primary/5 transition-all">
           <CardContent className="p-0">
             <div className="relative">
               <Link href={`/podcasts/${podcast.id}`}>
-                <div className="overflow-hidden">
-                  <img
-                    src={podcast.image || "/placeholder.svg"}
-                    alt={podcast.title}
-                    className="w-full aspect-square object-cover transition-transform duration-300 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                </div>
+                <img
+                  src={podcast.image || "/placeholder.svg"}
+                  alt={podcast.title}
+                  className="w-full aspect-square object-cover transition-transform group-hover:scale-105"
+                />
               </Link>
-              <Badge className="absolute top-2 right-2 bg-primary/90 hover:bg-primary dark:bg-primary/80 dark:hover:bg-primary/95">{podcast.category}</Badge>
-              <Button 
-                size="icon" 
-                variant="secondary"
-                className="absolute bottom-2 right-2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity shadow-md dark:bg-secondary/80 dark:hover:bg-secondary"
-                aria-label="Quick play"
-              >
-                <Play className="h-4 w-4" />
-              </Button>
+              <Badge className="absolute top-2 right-2 bg-primary/90 hover:bg-primary dark:bg-primary/80 dark:hover:bg-primary/90">{podcast.category}</Badge>
             </div>
             <div className="p-4">
               <Link href={`/podcasts/${podcast.id}`} className="hover:underline">
-                <h3 className="font-semibold text-lg line-clamp-1 group-hover:text-primary transition-colors">{podcast.title}</h3>
+                <h3 className="font-semibold text-lg line-clamp-1">{podcast.title}</h3>
               </Link>
               <p className="text-sm text-muted-foreground mb-2">{podcast.author}</p>
               <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
@@ -237,35 +226,25 @@ export function PodcastGrid({ type }: PodcastGridProps) {
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <Button size="sm" className="flex-1 dark:bg-primary/90 dark:hover:bg-primary dark:text-primary-foreground">
+                <Button size="sm" className="flex-1">
                   <Play className="h-4 w-4 mr-1" />
                   Play
                 </Button>
                 <Button
                   size="icon"
                   variant="outline"
-                  className="h-8 w-8 dark:hover:bg-secondary/20 dark:border-border/80"
+                  className="h-8 w-8"
                   onClick={() => toggleFavorite(podcast.id)}
                   aria-label={favorites.includes(podcast.id) ? "Remove from favorites" : "Add to favorites"}
                 >
-                  <Heart className={`h-4 w-4 ${favorites.includes(podcast.id) ? "fill-red-500 text-red-500 dark:fill-red-400 dark:text-red-400" : ""}`} />
+                  <Heart className={`h-4 w-4 ${favorites.includes(podcast.id) ? "fill-red-500 text-red-500" : ""}`} />
                 </Button>
                 <ShareMenu url={`/podcasts/${podcast.id}`} title={podcast.title}>
-                  <Button 
-                    size="icon" 
-                    variant="outline" 
-                    className="h-8 w-8 dark:hover:bg-secondary/20 dark:border-border/80" 
-                    aria-label="Share podcast"
-                  >
+                  <Button size="icon" variant="outline" className="h-8 w-8" aria-label="Share podcast">
                     <Share2 className="h-4 w-4" />
                   </Button>
                 </ShareMenu>
-                <Button 
-                  size="icon" 
-                  variant="outline" 
-                  className="h-8 w-8 dark:hover:bg-secondary/20 dark:border-border/80" 
-                  aria-label="Download podcast"
-                >
+                <Button size="icon" variant="outline" className="h-8 w-8" aria-label="Download podcast">
                   <Download className="h-4 w-4" />
                 </Button>
               </div>

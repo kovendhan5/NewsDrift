@@ -46,26 +46,41 @@ export function ShareMenu({ children, url, title }: ShareMenuProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => handleShare("facebook")}>
-          <Facebook className="mr-2 h-4 w-4" />
-          <span>Facebook</span>
+      <DropdownMenuContent align="end" className="min-w-[180px]">
+        <DropdownMenuItem 
+          onClick={() => handleShare("facebook")}
+          className="group cursor-pointer"
+        >
+          <Facebook className="mr-2 h-4 w-4 text-blue-600 dark:text-blue-500 group-hover:scale-110 transition-transform" />
+          <span className="group-hover:text-blue-600 dark:group-hover:text-blue-500 transition-colors">Facebook</span>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => handleShare("twitter")}>
-          <Twitter className="mr-2 h-4 w-4" />
-          <span>Twitter</span>
+        <DropdownMenuItem 
+          onClick={() => handleShare("twitter")}
+          className="group cursor-pointer"
+        >
+          <Twitter className="mr-2 h-4 w-4 text-sky-500 dark:text-sky-400 group-hover:scale-110 transition-transform" />
+          <span className="group-hover:text-sky-500 dark:group-hover:text-sky-400 transition-colors">Twitter</span>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => handleShare("linkedin")}>
-          <Linkedin className="mr-2 h-4 w-4" />
-          <span>LinkedIn</span>
+        <DropdownMenuItem 
+          onClick={() => handleShare("linkedin")}
+          className="group cursor-pointer"
+        >
+          <Linkedin className="mr-2 h-4 w-4 text-blue-700 dark:text-blue-600 group-hover:scale-110 transition-transform" />
+          <span className="group-hover:text-blue-700 dark:group-hover:text-blue-600 transition-colors">LinkedIn</span>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => handleShare("email")}>
-          <Mail className="mr-2 h-4 w-4" />
-          <span>Email</span>
+        <DropdownMenuItem 
+          onClick={() => handleShare("email")}
+          className="group cursor-pointer"
+        >
+          <Mail className="mr-2 h-4 w-4 text-orange-600 dark:text-orange-500 group-hover:scale-110 transition-transform" />
+          <span className="group-hover:text-orange-600 dark:group-hover:text-orange-500 transition-colors">Email</span>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => handleShare("copy")}>
-          <Copy className="mr-2 h-4 w-4" />
-          <span>Copy Link</span>
+        <DropdownMenuItem 
+          onClick={() => handleShare("copy")}
+          className="group cursor-pointer"
+        >
+          <Copy className="mr-2 h-4 w-4 text-primary group-hover:scale-110 transition-transform" />
+          <span className="group-hover:text-primary transition-colors">Copy Link</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

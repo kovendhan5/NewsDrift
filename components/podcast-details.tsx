@@ -81,43 +81,61 @@ export function PodcastDetails({ id }: PodcastDetailsProps) {
   }
 
   return (
-    <Card>
+    <Card className="group hover:shadow-lg dark:hover:shadow-primary/5 transition-all duration-300">
       <CardContent className="p-6 space-y-6">
-        <div className="relative">
+        <div className="relative overflow-hidden rounded-lg">
           <img
             src={podcast.image || "/placeholder.svg"}
             alt={podcast.title}
-            className="w-full aspect-square object-cover rounded-lg"
+            className="w-full aspect-square object-cover rounded-lg transition-transform duration-300 group-hover:scale-105"
           />
-          <Badge className="absolute top-2 right-2 bg-primary/90 hover:bg-primary">{podcast.category}</Badge>
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 dark:group-hover:bg-black/20 transition-colors duration-300" />
+          <Badge 
+            className="absolute top-2 right-2 bg-primary/90 hover:bg-primary dark:bg-primary/80 dark:hover:bg-primary/90 transition-colors"
+          >
+            {podcast.category}
+          </Badge>
         </div>
-
         <div>
-          <h1 className="text-2xl font-bold">{podcast.title}</h1>
-          <p className="text-muted-foreground">{podcast.author}</p>
+          <h1 className="text-2xl font-bold group-hover:text-primary transition-colors duration-200">{podcast.title}</h1>
+          <p className="text-muted-foreground group-hover:text-muted-foreground/80 transition-colors duration-200">
+            {podcast.author}
+          </p>
         </div>
-
-        <div className="flex items-center gap-4 text-sm">
-          <div className="flex items-center">
-            <Star className="h-4 w-4 text-yellow-500 mr-1" />
-            <span>{podcast.rating}</span>
+        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+          <div className="flex items-center group/rating">
+            <Star className="h-4 w-4 text-yellow-500 dark:text-yellow-400 mr-1 transition-transform group-hover/rating:scale-110" />
+            <span className="group-hover/rating:text-yellow-500 dark:group-hover/rating:text-yellow-400 transition-colors">
+              {podcast.rating}
+            </span>
           </div>
-          <div>{podcast.subscribers} subscribers</div>
-          <div>{podcast.episodes} episodes</div>
+          <div className="group/subs hover:text-primary transition-colors">
+            <span className="group-hover/subs:text-primary transition-colors">{podcast.subscribers}</span> subscribers
+          </div>
+          <div className="group/eps hover:text-primary transition-colors">
+            <span className="group-hover/eps:text-primary transition-colors">{podcast.episodes}</span> episodes
+          </div>
         </div>
-
-        <p className="text-sm">{podcast.description}</p>
-
+        <p className="text-sm text-muted-foreground group-hover:text-muted-foreground/80 transition-colors duration-200">
+          {podcast.description}
+        </p>
         <div className="flex items-center gap-2">
-          <Button className="flex-1" onClick={() => setIsSubscribed(!isSubscribed)}>
+          <Button 
+            className={`flex-1 shadow-sm hover:shadow-md dark:shadow-none dark:hover:shadow-primary/10 transition-all 
+              ${isSubscribed 
+                ? 'bg-primary/90 hover:bg-primary/80 dark:bg-primary/80 dark:hover:bg-primary/70' 
+                : ''}`
+            }
+            onClick={() => setIsSubscribed(!isSubscribed)}
+          >
             {isSubscribed ? (
               <>
-                <Bell className="h-4 w-4 mr-2 fill-current" />
+                <Bell className="h-4 w-4 mr-2 fill-current animate-in zoom-in duration-200" />
                 Subscribed
               </>
             ) : (
               <>
-                <Bell className="h-4 w-4 mr-2" />
+                <Bell className="h-4 w-4 mr-2 animate-in zoom-in duration-200" />
                 Subscribe
               </>
             )}
@@ -127,11 +145,23 @@ export function PodcastDetails({ id }: PodcastDetailsProps) {
             size="icon"
             onClick={() => setIsFavorite(!isFavorite)}
             aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+            className="shadow-sm hover:shadow-md dark:shadow-none dark:hover:shadow-primary/10 transition-all hover:scale-105 dark:border-muted/50"
           >
-            <Heart className={`h-4 w-4 ${isFavorite ? "fill-red-500 text-red-500" : ""}`} />
+            <Heart 
+              className={`h-4 w-4 transition-all duration-200 ${
+                isFavorite 
+                  ? "fill-red-500 text-red-500 scale-110" 
+                  : "hover:text-red-500"
+              }`} 
+            />
           </Button>
           <ShareMenu url={`/podcasts/${podcast.id}`} title={podcast.title}>
-            <Button variant="outline" size="icon" aria-label="Share podcast">
+            <Button 
+              variant="outline" 
+              size="icon" 
+              aria-label="Share podcast"
+              className="shadow-sm hover:shadow-md dark:shadow-none dark:hover:shadow-primary/10 transition-all hover:scale-105 dark:border-muted/50"
+            >
               <Share2 className="h-4 w-4" />
             </Button>
           </ShareMenu>

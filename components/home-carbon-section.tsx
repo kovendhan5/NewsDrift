@@ -46,7 +46,7 @@ export function HomeCarbonSection() {
   if (!userFootprint) {
     return (
       <Card className="overflow-hidden">
-        <div className="bg-gradient-to-r from-green-600 to-emerald-600 p-4 text-white">
+        <div className="bg-gradient-to-r from-green-600 to-emerald-600 dark:from-green-700 dark:to-emerald-800 p-4 text-white">
           <div className="flex items-center gap-2">
             <Leaf className="h-5 w-5" />
             <h3 className="font-semibold">Carbon Footprint</h3>
@@ -67,7 +67,7 @@ export function HomeCarbonSection() {
 
   return (
     <Card className="overflow-hidden">
-      <div className="bg-gradient-to-r from-green-600 to-emerald-600 p-4 text-white">
+      <div className="bg-gradient-to-r from-green-600 to-emerald-600 dark:from-green-700 dark:to-emerald-800 p-4 text-white">
         <div className="flex items-center gap-2">
           <Leaf className="h-5 w-5" />
           <h3 className="font-semibold">Your Carbon Footprint</h3>
@@ -89,7 +89,6 @@ export function HomeCarbonSection() {
               Your carbon footprint is {userFootprint.reduction}% lower than the average person.
             </p>
           </div>
-
           <div className="flex justify-between items-center pt-2">
             <div>
               <p className="text-sm">

@@ -67,14 +67,14 @@ export function CarbonFootprintResults({ results }: CarbonFootprintResultsProps)
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <Car className="h-4 w-4 text-blue-500 dark:text-blue-400" />
+                          <Car className="h-4 w-4 text-blue-500" />
                           <span>Transportation</span>
                         </div>
                         <span>{formatNumber(results.breakdown.transportation)} kg CO₂e</span>
                       </div>
                       <div className="h-3 w-full rounded-full bg-muted overflow-hidden">
                         <div
-                          className="h-full bg-blue-500 dark:bg-blue-400 rounded-full"
+                          className="h-full bg-blue-500 rounded-full"
                           style={{ width: `${transportationPercent}%` }}
                         ></div>
                       </div>
@@ -83,40 +83,40 @@ export function CarbonFootprintResults({ results }: CarbonFootprintResultsProps)
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <Utensils className="h-4 w-4 text-green-500 dark:text-green-400" />
+                          <Utensils className="h-4 w-4 text-green-500" />
                           <span>Diet</span>
                         </div>
                         <span>{formatNumber(results.breakdown.diet)} kg CO₂e</span>
                       </div>
                       <div className="h-3 w-full rounded-full bg-muted overflow-hidden">
-                        <div className="h-full bg-green-500 dark:bg-green-400 rounded-full" style={{ width: `${dietPercent}%` }}></div>
+                        <div className="h-full bg-green-500 rounded-full" style={{ width: `${dietPercent}%` }}></div>
                       </div>
                     </div>
 
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <Zap className="h-4 w-4 text-yellow-500 dark:text-yellow-400" />
+                          <Zap className="h-4 w-4 text-yellow-500" />
                           <span>Energy</span>
                         </div>
                         <span>{formatNumber(results.breakdown.energy)} kg CO₂e</span>
                       </div>
                       <div className="h-3 w-full rounded-full bg-muted overflow-hidden">
-                        <div className="h-full bg-yellow-500 dark:bg-yellow-400 rounded-full" style={{ width: `${energyPercent}%` }}></div>
+                        <div className="h-full bg-yellow-500 rounded-full" style={{ width: `${energyPercent}%` }}></div>
                       </div>
                     </div>
 
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <ShoppingBag className="h-4 w-4 text-purple-500 dark:text-purple-400" />
+                          <ShoppingBag className="h-4 w-4 text-purple-500" />
                           <span>Shopping</span>
                         </div>
                         <span>{formatNumber(results.breakdown.shopping)} kg CO₂e</span>
                       </div>
                       <div className="h-3 w-full rounded-full bg-muted overflow-hidden">
                         <div
-                          className="h-full bg-purple-500 dark:bg-purple-400 rounded-full"
+                          className="h-full bg-purple-500 rounded-full"
                           style={{ width: `${shoppingPercent}%` }}
                         ></div>
                       </div>
@@ -130,7 +130,7 @@ export function CarbonFootprintResults({ results }: CarbonFootprintResultsProps)
                 <Card>
                   <CardHeader className="pb-2">
                     <div className="flex items-center gap-2">
-                      <div className="rounded-full bg-blue-100 dark:bg-blue-950/50 p-2">
+                      <div className="rounded-full bg-blue-100 dark:bg-blue-900/50 p-2">
                         <Car className="h-4 w-4 text-blue-500 dark:text-blue-400" />
                       </div>
                       <CardTitle className="text-lg">Transportation</CardTitle>
@@ -147,7 +147,7 @@ export function CarbonFootprintResults({ results }: CarbonFootprintResultsProps)
                 <Card>
                   <CardHeader className="pb-2">
                     <div className="flex items-center gap-2">
-                      <div className="rounded-full bg-green-100 dark:bg-green-950/50 p-2">
+                      <div className="rounded-full bg-green-100 dark:bg-green-900/50 p-2">
                         <Utensils className="h-4 w-4 text-green-500 dark:text-green-400" />
                       </div>
                       <CardTitle className="text-lg">Diet</CardTitle>
@@ -162,7 +162,7 @@ export function CarbonFootprintResults({ results }: CarbonFootprintResultsProps)
                 <Card>
                   <CardHeader className="pb-2">
                     <div className="flex items-center gap-2">
-                      <div className="rounded-full bg-yellow-100 dark:bg-yellow-950/50 p-2">
+                      <div className="rounded-full bg-yellow-100 dark:bg-yellow-900/50 p-2">
                         <Zap className="h-4 w-4 text-yellow-500 dark:text-yellow-400" />
                       </div>
                       <CardTitle className="text-lg">Energy</CardTitle>
@@ -177,7 +177,7 @@ export function CarbonFootprintResults({ results }: CarbonFootprintResultsProps)
                 <Card>
                   <CardHeader className="pb-2">
                     <div className="flex items-center gap-2">
-                      <div className="rounded-full bg-purple-100 dark:bg-purple-950/50 p-2">
+                      <div className="rounded-full bg-purple-100 dark:bg-purple-900/50 p-2">
                         <ShoppingBag className="h-4 w-4 text-purple-500 dark:text-purple-400" />
                       </div>
                       <CardTitle className="text-lg">Shopping</CardTitle>

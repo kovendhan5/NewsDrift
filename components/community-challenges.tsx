@@ -108,7 +108,7 @@ export function CommunityChallenges() {
 
   return (
     <Card>
-      <CardHeader className="bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-t-lg">
+      <CardHeader className="bg-gradient-to-r from-green-600 to-emerald-600 dark:from-green-700 dark:to-emerald-800 text-white rounded-t-lg">
         <CardTitle className="flex items-center gap-2">
           <Users className="h-5 w-5" />
           Community Challenges
@@ -122,21 +122,29 @@ export function CommunityChallenges() {
           <div className="md:col-span-2 space-y-4">
             <h3 className="text-lg font-semibold mb-2">Active & Upcoming Challenges</h3>
             {challenges.map((challenge) => (
-              <Card key={challenge.id} className="overflow-hidden">
+              <Card 
+                key={challenge.id} 
+                className="overflow-hidden group hover:shadow-md dark:hover:shadow-primary/5 transition-all"
+              >
                 <CardContent className="p-4">
                   <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-semibold text-lg">{challenge.title}</h4>
-                    <Badge variant={challenge.status === "active" ? "default" : "outline"}>
+                    <h4 className="font-semibold text-lg group-hover:text-primary transition-colors">{challenge.title}</h4>
+                    <Badge 
+                      variant={challenge.status === "active" ? "default" : "outline"}
+                      className="dark:shadow-none dark:hover:shadow-primary/10"
+                    >
                       {challenge.status === "active" ? "Active" : "Upcoming"}
                     </Badge>
                   </div>
-                  <p className="text-sm text-muted-foreground mb-3">{challenge.description}</p>
+                  <p className="text-sm text-muted-foreground group-hover:text-muted-foreground/80 transition-colors mb-3">
+                    {challenge.description}
+                  </p>
                   <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
-                    <Users className="h-4 w-4" />
+                    <Users className="h-4 w-4 group-hover:text-primary transition-colors" />
                     <span>{challenge.participants} participants</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
-                    <Calendar className="h-4 w-4" />
+                    <Calendar className="h-4 w-4 group-hover:text-primary transition-colors" />
                     <span>
                       {formatDate(challenge.startDate)} - {formatDate(challenge.endDate)}
                     </span>
@@ -147,13 +155,17 @@ export function CommunityChallenges() {
                         <span>Progress</span>
                         <span>{challenge.progress}%</span>
                       </div>
-                      <Progress value={challenge.progress} className="h-2" />
+                      <Progress 
+                        value={challenge.progress} 
+                        className="h-2 dark:bg-muted/30"
+                      />
                     </div>
                   )}
                   <div className="flex justify-end">
                     <Button
                       variant={joinedChallenges.includes(challenge.id) ? "outline" : "default"}
                       onClick={() => toggleJoinChallenge(challenge.id)}
+                      className="shadow-sm hover:shadow-md dark:shadow-none dark:hover:shadow-primary/10 transition-all"
                     >
                       {joinedChallenges.includes(challenge.id) ? "Leave Challenge" : "Join Challenge"}
                     </Button>
@@ -162,59 +174,66 @@ export function CommunityChallenges() {
               </Card>
             ))}
             <div className="flex justify-center mt-4">
-              <Button variant="outline" className="flex items-center gap-1">
+              <Button 
+                variant="outline" 
+                className="flex items-center gap-1 shadow-sm hover:shadow-md dark:shadow-none dark:hover:shadow-primary/10 transition-all"
+              >
                 View All Challenges
                 <ArrowRight className="h-4 w-4 ml-1" />
               </Button>
             </div>
           </div>
-
           <div>
             <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-              <Trophy className="h-5 w-5 text-yellow-500" />
+              <Trophy className="h-5 w-5 text-yellow-500 dark:text-yellow-400" />
               Leaderboard
             </h3>
-            <Card>
+            <Card className="hover:shadow-md dark:hover:shadow-primary/5 transition-all">
               <CardContent className="p-4">
                 <div className="space-y-4">
                   {leaderboard.map((user, index) => (
-                    <div key={user.id} className="flex items-center justify-between">
+                    <div 
+                      key={user.id} 
+                      className="flex items-center justify-between group hover:bg-muted/50 dark:hover:bg-muted/20 rounded-lg p-2 transition-colors"
+                    >
                       <div className="flex items-center gap-3">
                         <div
-                          className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
+                          className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium transition-transform group-hover:scale-110 ${
                             index === 0
-                              ? "bg-yellow-500 text-white"
+                              ? "bg-yellow-500 dark:bg-yellow-500/90 text-white"
                               : index === 1
-                                ? "bg-gray-300 text-gray-800"
+                                ? "bg-gray-300 dark:bg-gray-400 text-gray-800 dark:text-gray-900"
                                 : index === 2
-                                  ? "bg-amber-700 text-white"
+                                  ? "bg-amber-700 dark:bg-amber-700/90 text-white"
                                   : "bg-muted text-muted-foreground"
                           }`}
                         >
                           {index + 1}
                         </div>
-                        <Avatar className="h-8 w-8">
+                        <Avatar className="h-8 w-8 transition-transform group-hover:scale-105">
                           <AvatarImage src={user.avatar} alt={user.name} />
                           <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                         </Avatar>
-                        <span className="font-medium">{user.name}</span>
+                        <span className="font-medium group-hover:text-primary transition-colors">{user.name}</span>
                       </div>
-                      <span className="font-semibold">{user.points} pts</span>
+                      <span className="font-semibold group-hover:text-primary transition-colors">{user.points} pts</span>
                     </div>
                   ))}
                 </div>
-                <div className="mt-4 pt-4 border-t">
-                  <div className="flex items-center justify-between">
+                <div className="mt-4 pt-4 border-t dark:border-muted/30">
+                  <div 
+                    className="flex items-center justify-between group hover:bg-muted/50 dark:hover:bg-muted/20 rounded-lg p-2 transition-colors"
+                  >
                     <div className="flex items-center gap-3">
-                      <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium bg-muted text-muted-foreground">
+                      <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium bg-muted text-muted-foreground transition-transform group-hover:scale-110">
                         24
                       </div>
-                      <Avatar className="h-8 w-8">
+                      <Avatar className="h-8 w-8 transition-transform group-hover:scale-105">
                         <AvatarFallback>YO</AvatarFallback>
                       </Avatar>
-                      <span className="font-medium">You</span>
+                      <span className="font-medium group-hover:text-primary transition-colors">You</span>
                     </div>
-                    <span className="font-semibold">320 pts</span>
+                    <span className="font-semibold group-hover:text-primary transition-colors">320 pts</span>
                   </div>
                 </div>
               </CardContent>

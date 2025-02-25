@@ -183,199 +183,190 @@ export function CarbonFootprintCalculator() {
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                   <div className="space-y-6">
-                    <div className="border-b pb-4">
-                      <h3 className="text-lg font-medium mb-4">Transportation</h3>
-                      <div className="grid gap-4 sm:grid-cols-2">
-                        <FormField
-                          control={form.control}
-                          name="transportation.milesDriven"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Miles driven per week</FormLabel>
+                    {/* Transportation Section */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold">Transportation</h3>
+                      <FormField
+                        control={form.control}
+                        name="transportation.milesDriven"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Miles Driven Per Week</FormLabel>
+                            <FormControl>
+                              <Input type="number" {...field} className="max-w-[180px] dark:shadow-none dark:hover:shadow-primary/10" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="transportation.vehicleType"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Vehicle Type</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
                               <FormControl>
-                                <Input type="number" min="0" {...field} />
+                                <SelectTrigger className="w-[180px] dark:shadow-none dark:hover:shadow-primary/10">
+                                  <SelectValue placeholder="Select vehicle type" />
+                                </SelectTrigger>
                               </FormControl>
-                              <FormDescription>Average miles driven by car per week</FormDescription>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="transportation.vehicleType"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Type of vehicle</FormLabel>
-                              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Select vehicle type" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  <SelectItem value="car">Car (Gasoline/Diesel)</SelectItem>
-                                  <SelectItem value="hybrid">Hybrid Car</SelectItem>
-                                  <SelectItem value="electric">Electric Car</SelectItem>
-                                  <SelectItem value="motorcycle">Motorcycle</SelectItem>
-                                  <SelectItem value="publicTransport">Public Transport</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <FormDescription>Your primary mode of transportation</FormDescription>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="transportation.publicTransportFrequency"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Public transport trips per week</FormLabel>
-                              <FormControl>
-                                <Input type="number" min="0" {...field} />
-                              </FormControl>
-                              <FormDescription>Number of public transport trips per week</FormDescription>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
+                              <SelectContent>
+                                <SelectItem value="car">Car</SelectItem>
+                                <SelectItem value="motorcycle">Motorcycle</SelectItem>
+                                <SelectItem value="electric">Electric Vehicle</SelectItem>
+                                <SelectItem value="hybrid">Hybrid</SelectItem>
+                                <SelectItem value="publicTransport">Public Transport</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="transportation.publicTransportFrequency"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Public Transport Trips Per Week</FormLabel>
+                            <FormControl>
+                              <Input type="number" {...field} className="max-w-[180px] dark:shadow-none dark:hover:shadow-primary/10" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
                     </div>
 
-                    <div className="border-b pb-4">
-                      <h3 className="text-lg font-medium mb-4">Diet</h3>
-                      <div className="grid gap-4 sm:grid-cols-2">
-                        <FormField
-                          control={form.control}
-                          name="diet.vegetarianMeals"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Vegetarian meals per week</FormLabel>
+                    {/* Diet Section */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold">Diet</h3>
+                      <FormField
+                        control={form.control}
+                        name="diet.vegetarianMeals"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Vegetarian Meals Per Week</FormLabel>
+                            <FormControl>
+                              <Input type="number" {...field} className="max-w-[180px] dark:shadow-none dark:hover:shadow-primary/10" />
+                            </FormControl>
+                            <FormDescription>Out of 21 meals per week</FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="diet.localFoodConsumption"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Local Food Consumption</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
                               <FormControl>
-                                <Input type="number" min="0" max="21" {...field} />
+                                <SelectTrigger className="w-[180px] dark:shadow-none dark:hover:shadow-primary/10">
+                                  <SelectValue placeholder="Select frequency" />
+                                </SelectTrigger>
                               </FormControl>
-                              <FormDescription>Number of vegetarian meals per week (max 21)</FormDescription>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="diet.localFoodConsumption"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Local and organic food consumption</FormLabel>
-                              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Select frequency" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  <SelectItem value="never">Never</SelectItem>
-                                  <SelectItem value="rarely">Rarely</SelectItem>
-                                  <SelectItem value="often">Often</SelectItem>
-                                  <SelectItem value="always">Always</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <FormDescription>How often you consume local and organic food</FormDescription>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
+                              <SelectContent>
+                                <SelectItem value="never">Never</SelectItem>
+                                <SelectItem value="rarely">Rarely</SelectItem>
+                                <SelectItem value="often">Often</SelectItem>
+                                <SelectItem value="always">Always</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
                     </div>
 
-                    <div className="border-b pb-4">
-                      <h3 className="text-lg font-medium mb-4">Energy</h3>
-                      <div className="grid gap-4 sm:grid-cols-2">
-                        <FormField
-                          control={form.control}
-                          name="energy.electricityUsage"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Monthly electricity usage (kWh)</FormLabel>
-                              <FormControl>
-                                <Input type="number" min="0" {...field} />
-                              </FormControl>
-                              <FormDescription>Average monthly electricity usage in kilowatt-hours</FormDescription>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="energy.renewablePercentage"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Renewable energy percentage: {field.value}%</FormLabel>
-                              <FormControl>
+                    {/* Energy Section */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold">Energy Usage</h3>
+                      <FormField
+                        control={form.control}
+                        name="energy.electricityUsage"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Monthly Electricity Usage (kWh)</FormLabel>
+                            <FormControl>
+                              <Input type="number" {...field} className="max-w-[180px] dark:shadow-none dark:hover:shadow-primary/10" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="energy.renewablePercentage"
+                        render={({ field: { value, onChange } }) => (
+                          <FormItem>
+                            <FormLabel>Renewable Energy Percentage</FormLabel>
+                            <FormControl>
+                              <div className="w-full max-w-[180px] pt-2">
                                 <Slider
-                                  defaultValue={field.value}
+                                  value={value}
+                                  onValueChange={onChange}
                                   max={100}
                                   step={1}
-                                  onValueChange={field.onChange}
-                                  className="pt-5"
+                                  className="dark:[&_[role=slider]]:border-primary dark:[&_[role=slider]]:shadow-md"
                                 />
-                              </FormControl>
-                              <FormDescription>Percentage of your energy from renewable sources</FormDescription>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
+                              </div>
+                            </FormControl>
+                            <FormDescription>{value}% from renewable sources</FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
                     </div>
 
-                    <div>
-                      <h3 className="text-lg font-medium mb-4">Shopping</h3>
-                      <div className="grid gap-4 sm:grid-cols-2">
-                        <FormField
-                          control={form.control}
-                          name="shopping.onlineShopping"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Frequency of online shopping</FormLabel>
-                              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Select frequency" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  <SelectItem value="never">Never</SelectItem>
-                                  <SelectItem value="rarely">Rarely</SelectItem>
-                                  <SelectItem value="sometimes">Sometimes</SelectItem>
-                                  <SelectItem value="often">Often</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <FormDescription>How often you shop online</FormDescription>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="shopping.sustainableProducts"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Preference for sustainable products</FormLabel>
-                              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Select preference" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  <SelectItem value="yes">Yes</SelectItem>
-                                  <SelectItem value="no">No</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <FormDescription>Do you prefer sustainable and eco-friendly products?</FormDescription>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
+                    {/* Shopping Section */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold">Shopping Habits</h3>
+                      <FormField
+                        control={form.control}
+                        name="shopping.onlineShopping"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Online Shopping Frequency</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger className="w-[180px] dark:shadow-none dark:hover:shadow-primary/10">
+                                  <SelectValue placeholder="Select frequency" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="never">Never</SelectItem>
+                                <SelectItem value="rarely">Rarely</SelectItem>
+                                <SelectItem value="sometimes">Sometimes</SelectItem>
+                                <SelectItem value="often">Often</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="shopping.sustainableProducts"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Do you prefer sustainable products?</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger className="w-[180px] dark:shadow-none dark:hover:shadow-primary/10">
+                                  <SelectValue placeholder="Select option" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="yes">Yes</SelectItem>
+                                <SelectItem value="no">No</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
                     </div>
                   </div>
                   <Button

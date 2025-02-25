@@ -4,8 +4,16 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Progress } from "@/components/ui/progress"
 import { Leaf, Newspaper, Mic, ArrowRight } from "lucide-react"
 import Link from "next/link"
+
+interface RecommendationProps {
+  impact: string
+  description: string
+  actionRequired: string
+  progress?: number
+}
 
 // Mock carbon-related content
 const mockCarbonContent = {
@@ -67,6 +75,55 @@ interface CarbonContentRecommendationsProps {
   footprintData?: any
 }
 
+function Recommendation({ impact, description, actionRequired, progress }: RecommendationProps) {
+  const getImpactStyles = (impact: string) => {
+    const baseStyles = "rounded-full px-2 py-0.5 text-xs font-medium"
+    switch (impact.toLowerCase()) {
+      case "high":
+        return `${baseStyles} bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400`
+      case "medium":
+        return `${baseStyles} bg-yellow-100 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-400`
+      case "low":
+        return `${baseStyles} bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400`
+      default:
+        return `${baseStyles} bg-gray-100 text-gray-700 dark:bg-gray-500/20 dark:text-gray-400`
+    }
+  }
+
+  return (
+    <Card className="group hover:shadow-md dark:hover:shadow-primary/5 transition-all">
+      <CardContent className="p-4 space-y-4">
+        <div className="flex justify-between items-start">
+          <div className="space-y-1">
+            <span className={getImpactStyles(impact)}>{impact} Impact</span>
+            <p className="text-sm text-muted-foreground group-hover:text-muted-foreground/80 transition-colors">
+              {description}
+            </p>
+          </div>
+        </div>
+        <div>
+          <p className="text-sm font-medium mb-2">Action Required</p>
+          <p className="text-sm text-muted-foreground group-hover:text-muted-foreground/80 transition-colors">
+            {actionRequired}
+          </p>
+        </div>
+        {progress !== undefined && (
+          <div>
+            <div className="flex justify-between text-sm mb-1">
+              <span className="text-muted-foreground">Progress</span>
+              <span className="font-medium">{progress}%</span>
+            </div>
+            <Progress 
+              value={progress} 
+              className="h-2 dark:bg-muted/30" 
+            />
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
+
 export function CarbonContentRecommendations({ footprintData }: CarbonContentRecommendationsProps) {
   const [loading, setLoading] = useState(true)
   const [content, setContent] = useState<typeof mockCarbonContent>({ articles: [], podcasts: [] })
@@ -83,126 +140,52 @@ export function CarbonContentRecommendations({ footprintData }: CarbonContentRec
   }, [])
 
   return (
-    <Card>
-      <CardHeader className="bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-t-lg">
-        <CardTitle className="flex items-center gap-2">
-          <Leaf className="h-5 w-5" />
-          Recommended Content for You
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="pt-6">
-        <Tabs defaultValue="articles">
-          <TabsList className="mb-4">
-            <TabsTrigger value="articles" className="flex items-center gap-1">
-              <Newspaper className="h-4 w-4" />
-              Articles
-            </TabsTrigger>
-            <TabsTrigger value="podcasts" className="flex items-center gap-1">
-              <Mic className="h-4 w-4" />
-              Podcasts
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="articles" className="space-y-4">
-            {loading ? (
-              <div className="space-y-4">
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <Card key={i} className="overflow-hidden">
-                    <div className="h-32 bg-muted animate-pulse" />
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <>
-                {content.articles.map((article) => (
-                  <Card key={article.id} className="overflow-hidden transition-all hover:shadow-md">
-                    <div className="md:flex">
-                      <div className="md:w-1/3">
-                        <img
-                          alt={article.title}
-                          className="h-48 w-full object-cover md:h-full"
-                          src={article.image || "/placeholder.svg"}
-                        />
-                      </div>
-                      <div className="md:w-2/3 p-4">
-                        <div className="mb-2">
-                          <span className="text-sm font-medium text-primary">{article.category}</span>
-                          <h3 className="font-semibold text-lg mt-1">{article.title}</h3>
-                        </div>
-                        <p className="text-sm text-muted-foreground mb-3">{article.description}</p>
-                        <div className="flex justify-between items-center">
-                          <time className="text-xs text-muted-foreground">{article.date}</time>
-                          <Button size="sm" variant="outline">
-                            Read More
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-                <div className="flex justify-center mt-6">
-                  <Button asChild>
-                    <Link href="/categories/environment" className="flex items-center gap-1">
-                      Browse More Environmental Content
-                      <ArrowRight className="h-4 w-4 ml-1" />
-                    </Link>
-                  </Button>
-                </div>
-              </>
-            )}
-          </TabsContent>
-
-          <TabsContent value="podcasts" className="space-y-4">
-            {loading ? (
-              <div className="space-y-4">
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <Card key={i} className="overflow-hidden">
-                    <div className="h-24 bg-muted animate-pulse" />
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <>
-                {content.podcasts.map((podcast) => (
-                  <Card key={podcast.id}>
-                    <CardContent className="p-4">
-                      <div className="flex gap-4">
-                        <img
-                          alt={podcast.title}
-                          className="h-20 w-20 rounded-lg object-cover"
-                          src={podcast.image || "/placeholder.svg"}
-                        />
-                        <div className="flex flex-col justify-between flex-1">
-                          <div>
-                            <h3 className="font-semibold">{podcast.title}</h3>
-                            <p className="text-sm text-muted-foreground">{podcast.episode}</p>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <div className="text-sm text-muted-foreground">{podcast.duration}</div>
-                            <Button size="sm" variant="secondary">
-                              <Mic className="mr-2 h-4 w-4" />
-                              Listen
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-                <div className="flex justify-center mt-6">
-                  <Button asChild>
-                    <Link href="/podcasts" className="flex items-center gap-1">
-                      Discover More Environmental Podcasts
-                      <ArrowRight className="h-4 w-4 ml-1" />
-                    </Link>
-                  </Button>
-                </div>
-              </>
-            )}
-          </TabsContent>
-        </Tabs>
-      </CardContent>
-    </Card>
+    <section className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold">Personalized Recommendations</h2>
+        <Button 
+          variant="outline" 
+          className="shadow-sm hover:shadow-md dark:shadow-none dark:hover:shadow-primary/10 transition-all"
+        >
+          View All
+          <ArrowRight className="ml-2 h-4 w-4" />
+        </Button>
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <Recommendation
+          impact="High"
+          description="Switch to renewable energy sources for your home"
+          actionRequired="Contact your energy provider about green energy options or consider installing solar panels."
+          progress={25}
+        />
+        <Recommendation
+          impact="Medium"
+          description="Reduce meat consumption"
+          actionRequired="Try having at least 3 meatless days per week."
+          progress={50}
+        />
+        <Recommendation
+          impact="Low"
+          description="Start composting kitchen waste"
+          actionRequired="Set up a composting system in your backyard or join a community composting program."
+          progress={75}
+        />
+      </div>
+      <Card className="overflow-hidden group">
+        <div className="bg-gradient-to-r from-green-600 to-emerald-600 dark:from-green-700 dark:to-emerald-800 p-4 flex items-center justify-between text-white">
+          <div className="flex items-center gap-2">
+            <Leaf className="h-5 w-5" />
+            <h3 className="font-semibold">Join the Community Challenge</h3>
+          </div>
+          <Button 
+            variant="secondary" 
+            className="shadow-sm hover:shadow-md dark:shadow-none dark:hover:shadow-primary/10 transition-all hover:scale-105"
+          >
+            Join Now
+          </Button>
+        </div>
+      </Card>
+    </section>
   )
 }
 

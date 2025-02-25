@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -45,7 +45,7 @@ export function NewsFeed() {
         <h2 className="text-2xl font-bold tracking-tight">Latest News</h2>
         <div className="flex items-center gap-2">
           <Select defaultValue="latest">
-            <SelectTrigger className="w-[140px]" aria-label="Sort articles">
+            <SelectTrigger className="w-[140px] dark:shadow-none dark:hover:shadow-primary/10">
               <SelectValue placeholder="Sort by" />
             </SelectTrigger>
             <SelectContent>
@@ -63,53 +63,41 @@ export function NewsFeed() {
         {loading
           ? Array.from({ length: 3 }).map((_, i) => <LoadingCard key={i} />)
           : articles.map((article) => (
-              <Card key={article.id} className="overflow-hidden transition-all hover:shadow-lg dark:hover:shadow-primary/5 group">
-                <div className="md:flex">
-                  <div className="md:w-1/3 relative overflow-hidden">
-                    <img
-                      alt={article.title}
-                      className="h-48 w-full object-cover md:h-full transition-transform duration-200 group-hover:scale-105"
-                      src={article.image || "/placeholder.svg"}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none dark:from-black/40"></div>
-                  </div>
-                  <div className="md:w-2/3">
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-primary dark:text-primary/90">{article.category}</span>
-                        <time className="text-sm text-muted-foreground">{article.date}</time>
-                      </div>
-                      <CardTitle className="line-clamp-2 group-hover:text-primary transition-colors">
-                        <a href="#" className="hover:underline">
+              <Card 
+                key={article.id}
+                className="overflow-hidden group hover:shadow-md dark:hover:shadow-primary/5 transition-all"
+              >
+                <CardContent className="p-6">
+                  <div className="flex flex-col md:flex-row gap-6">
+                    <div className="relative md:w-1/3 aspect-video md:aspect-square overflow-hidden rounded-lg">
+                      <img
+                        src={article.image}
+                        alt={article.title}
+                        className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 dark:group-hover:bg-black/20 transition-colors duration-300" />
+                    </div>
+                    <div className="md:w-2/3 space-y-4">
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium text-primary">{article.category}</span>
+                          <time className="text-sm text-muted-foreground">{article.date}</time>
+                        </div>
+                        <h3 className="text-xl font-semibold group-hover:text-primary transition-colors">
                           {article.title}
-                        </a>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="line-clamp-2 text-muted-foreground mb-4">{article.description}</p>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          className="transition-all hover:scale-105 shadow-sm hover:shadow-md dark:bg-secondary/80 dark:hover:bg-secondary"
-                          aria-label={`Listen to ${article.title}`}
-                        >
-                          <PlayCircle className="mr-2 h-4 w-4" />
-                          Listen
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="transition-all hover:scale-105 hover:bg-secondary/20"
-                          aria-label={`Share ${article.title}`}
-                        >
-                          <Share2 className="mr-2 h-4 w-4" />
-                          Share
-                        </Button>
+                        </h3>
                       </div>
-                    </CardContent>
+                      <p className="text-muted-foreground group-hover:text-muted-foreground/80 transition-colors">
+                        {article.description}
+                      </p>
+                      <Button 
+                        className="shadow-sm hover:shadow-md dark:shadow-none dark:hover:shadow-primary/10 transition-all"
+                      >
+                        Read More
+                      </Button>
+                    </div>
                   </div>
-                </div>
+                </CardContent>
               </Card>
             ))}
       </div>

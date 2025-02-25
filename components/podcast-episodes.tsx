@@ -151,7 +151,7 @@ export function PodcastEpisodes({ id }: PodcastEpisodesProps) {
       <CardContent>
         <Tabs defaultValue="all">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-            <TabsList>
+            <TabsList className="dark:bg-muted/50">
               <TabsTrigger value="all">All Episodes</TabsTrigger>
               <TabsTrigger value="latest">Latest</TabsTrigger>
               <TabsTrigger value="popular">Popular</TabsTrigger>
@@ -161,7 +161,7 @@ export function PodcastEpisodes({ id }: PodcastEpisodesProps) {
               <Input
                 type="search"
                 placeholder="Search episodes..."
-                className="pl-8 w-full sm:w-[250px]"
+                className="pl-8 w-full sm:w-[250px] dark:shadow-none dark:hover:shadow-primary/10 transition-shadow"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -175,26 +175,39 @@ export function PodcastEpisodes({ id }: PodcastEpisodesProps) {
               </div>
             ) : (
               filteredEpisodes.map((episode) => (
-                <div key={episode.id} className="py-4 border-b last:border-0">
-                  <div className="flex justify-between items-start mb-1">
-                    <h3 className="font-medium">{episode.title}</h3>
+                <div 
+                  key={episode.id} 
+                  className="py-4 border-b last:border-0 dark:border-muted/20 group hover:bg-muted/5 dark:hover:bg-muted/10 rounded-lg transition-colors duration-200"
+                >
+                  <div className="flex justify-between items-start mb-1 px-3">
+                    <h3 className="font-medium group-hover:text-primary transition-colors">{episode.title}</h3>
                     <div className="flex items-center text-sm text-muted-foreground whitespace-nowrap ml-2">
-                      <Clock className="h-3 w-3 mr-1" />
+                      <Clock className="h-3 w-3 mr-1 group-hover:text-primary transition-colors" />
                       {episode.duration}
                     </div>
                   </div>
-                  <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{episode.description}</p>
-                  <div className="flex justify-between items-center">
+                  <p className="text-sm text-muted-foreground mb-3 line-clamp-2 px-3 group-hover:text-muted-foreground/80 transition-colors">
+                    {episode.description}
+                  </p>
+                  <div className="flex justify-between items-center px-3">
                     <div className="flex items-center text-xs text-muted-foreground">
-                      <Calendar className="h-3 w-3 mr-1" />
+                      <Calendar className="h-3 w-3 mr-1 group-hover:text-primary transition-colors" />
                       {formatDate(episode.date)}
                     </div>
                     <div className="flex items-center gap-2">
-                      <Button size="sm" variant="secondary">
+                      <Button 
+                        size="sm" 
+                        variant="secondary"
+                        className="shadow-sm hover:shadow-md dark:shadow-none dark:hover:shadow-primary/10 transition-all hover:scale-105"
+                      >
                         <Play className="h-4 w-4 mr-1" />
                         Play
                       </Button>
-                      <Button size="sm" variant="outline">
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        className="shadow-sm hover:shadow-md dark:shadow-none dark:hover:shadow-primary/10 transition-all hover:scale-105 dark:border-muted/50"
+                      >
                         <Download className="h-4 w-4 mr-1" />
                         Download
                       </Button>
@@ -207,26 +220,39 @@ export function PodcastEpisodes({ id }: PodcastEpisodesProps) {
 
           <TabsContent value="latest" className="space-y-0 mt-0">
             {filteredEpisodes.slice(0, 3).map((episode) => (
-              <div key={episode.id} className="py-4 border-b last:border-0">
-                <div className="flex justify-between items-start mb-1">
-                  <h3 className="font-medium">{episode.title}</h3>
+              <div 
+                key={episode.id} 
+                className="py-4 border-b last:border-0 dark:border-muted/20 group hover:bg-muted/5 dark:hover:bg-muted/10 rounded-lg transition-colors duration-200"
+              >
+                <div className="flex justify-between items-start mb-1 px-3">
+                  <h3 className="font-medium group-hover:text-primary transition-colors">{episode.title}</h3>
                   <div className="flex items-center text-sm text-muted-foreground whitespace-nowrap ml-2">
-                    <Clock className="h-3 w-3 mr-1" />
+                    <Clock className="h-3 w-3 mr-1 group-hover:text-primary transition-colors" />
                     {episode.duration}
                   </div>
                 </div>
-                <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{episode.description}</p>
-                <div className="flex justify-between items-center">
+                <p className="text-sm text-muted-foreground mb-3 line-clamp-2 px-3 group-hover:text-muted-foreground/80 transition-colors">
+                  {episode.description}
+                </p>
+                <div className="flex justify-between items-center px-3">
                   <div className="flex items-center text-xs text-muted-foreground">
-                    <Calendar className="h-3 w-3 mr-1" />
+                    <Calendar className="h-3 w-3 mr-1 group-hover:text-primary transition-colors" />
                     {formatDate(episode.date)}
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button size="sm" variant="secondary">
+                    <Button 
+                      size="sm" 
+                      variant="secondary"
+                      className="shadow-sm hover:shadow-md dark:shadow-none dark:hover:shadow-primary/10 transition-all hover:scale-105"
+                    >
                       <Play className="h-4 w-4 mr-1" />
                       Play
                     </Button>
-                    <Button size="sm" variant="outline">
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      className="shadow-sm hover:shadow-md dark:shadow-none dark:hover:shadow-primary/10 transition-all hover:scale-105 dark:border-muted/50"
+                    >
                       <Download className="h-4 w-4 mr-1" />
                       Download
                     </Button>
@@ -238,26 +264,39 @@ export function PodcastEpisodes({ id }: PodcastEpisodesProps) {
 
           <TabsContent value="popular" className="space-y-0 mt-0">
             {filteredEpisodes.slice(1, 4).map((episode) => (
-              <div key={episode.id} className="py-4 border-b last:border-0">
-                <div className="flex justify-between items-start mb-1">
-                  <h3 className="font-medium">{episode.title}</h3>
+              <div 
+                key={episode.id} 
+                className="py-4 border-b last:border-0 dark:border-muted/20 group hover:bg-muted/5 dark:hover:bg-muted/10 rounded-lg transition-colors duration-200"
+              >
+                <div className="flex justify-between items-start mb-1 px-3">
+                  <h3 className="font-medium group-hover:text-primary transition-colors">{episode.title}</h3>
                   <div className="flex items-center text-sm text-muted-foreground whitespace-nowrap ml-2">
-                    <Clock className="h-3 w-3 mr-1" />
+                    <Clock className="h-3 w-3 mr-1 group-hover:text-primary transition-colors" />
                     {episode.duration}
                   </div>
                 </div>
-                <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{episode.description}</p>
-                <div className="flex justify-between items-center">
+                <p className="text-sm text-muted-foreground mb-3 line-clamp-2 px-3 group-hover:text-muted-foreground/80 transition-colors">
+                  {episode.description}
+                </p>
+                <div className="flex justify-between items-center px-3">
                   <div className="flex items-center text-xs text-muted-foreground">
-                    <Calendar className="h-3 w-3 mr-1" />
+                    <Calendar className="h-3 w-3 mr-1 group-hover:text-primary transition-colors" />
                     {formatDate(episode.date)}
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button size="sm" variant="secondary">
+                    <Button 
+                      size="sm" 
+                      variant="secondary"
+                      className="shadow-sm hover:shadow-md dark:shadow-none dark:hover:shadow-primary/10 transition-all hover:scale-105"
+                    >
                       <Play className="h-4 w-4 mr-1" />
                       Play
                     </Button>
-                    <Button size="sm" variant="outline">
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      className="shadow-sm hover:shadow-md dark:shadow-none dark:hover:shadow-primary/10 transition-all hover:scale-105 dark:border-muted/50"
+                    >
                       <Download className="h-4 w-4 mr-1" />
                       Download
                     </Button>

@@ -175,7 +175,7 @@ export function CarbonFootprintRecommendations({ results }: CarbonFootprintRecom
   return (
     <div className="space-y-8">
       <Card>
-        <CardHeader className="bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-t-lg">
+        <CardHeader className="bg-gradient-to-r from-green-600 to-emerald-600 dark:from-green-700 dark:to-emerald-800 text-white rounded-t-lg">
           <CardTitle>Personalized Recommendations</CardTitle>
           <CardDescription className="text-white/80">
             Based on your carbon footprint results, here are some recommendations to help you reduce your environmental
@@ -186,10 +186,10 @@ export function CarbonFootprintRecommendations({ results }: CarbonFootprintRecom
           <div className="space-y-6">
             <div>
               <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                {highestCategory.category === "transportation" && <Car className="h-5 w-5 text-blue-500" />}
-                {highestCategory.category === "diet" && <Utensils className="h-5 w-5 text-green-500" />}
-                {highestCategory.category === "energy" && <Zap className="h-5 w-5 text-yellow-500" />}
-                {highestCategory.category === "shopping" && <ShoppingBag className="h-5 w-5 text-purple-500" />}
+                {highestCategory.category === "transportation" && <Car className="h-5 w-5 text-blue-500 dark:text-blue-400" />}
+                {highestCategory.category === "diet" && <Utensils className="h-5 w-5 text-green-500 dark:text-green-400" />}
+                {highestCategory.category === "energy" && <Zap className="h-5 w-5 text-yellow-500 dark:text-yellow-400" />}
+                {highestCategory.category === "shopping" && <ShoppingBag className="h-5 w-5 text-purple-500 dark:text-purple-400" />}
                 Focus Area: {highestCategory.category.charAt(0).toUpperCase() + highestCategory.category.slice(1)}
               </h3>
               <p className="text-muted-foreground mb-4">
@@ -197,24 +197,29 @@ export function CarbonFootprintRecommendations({ results }: CarbonFootprintRecom
               </p>
               <div className="grid gap-4 sm:grid-cols-2">
                 {categoryRecommendations.map((recommendation, index) => (
-                  <Card key={index} className="overflow-hidden transition-all hover:shadow-md">
+                  <Card 
+                    key={index} 
+                    className="overflow-hidden transition-all hover:shadow-md dark:hover:shadow-primary/5 group"
+                  >
                     <CardHeader className="pb-2">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <div className="rounded-full bg-primary/10 p-2">
+                          <div className="rounded-full bg-primary/10 p-2 group-hover:bg-primary/20 dark:bg-primary/20 dark:group-hover:bg-primary/30 transition-colors">
                             <recommendation.icon className="h-4 w-4 text-primary" />
                           </div>
-                          <CardTitle className="text-base">{recommendation.title}</CardTitle>
+                          <CardTitle className="text-base group-hover:text-primary transition-colors">{recommendation.title}</CardTitle>
                         </div>
                         <span
-                          className={`text-xs font-medium ${impactColors[recommendation.impact as keyof typeof impactColors]}`}
+                          className={`text-xs font-medium ${impactColors[recommendation.impact as keyof typeof impactColors]} dark:opacity-90`}
                         >
                           {recommendation.impact} Impact
                         </span>
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-sm text-muted-foreground">{recommendation.description}</p>
+                      <p className="text-sm text-muted-foreground group-hover:text-muted-foreground/80 transition-colors">
+                        {recommendation.description}
+                      </p>
                     </CardContent>
                   </Card>
                 ))}
@@ -225,19 +230,26 @@ export function CarbonFootprintRecommendations({ results }: CarbonFootprintRecom
               <h3 className="text-lg font-semibold mb-4">General Recommendations</h3>
               <div className="grid gap-4 sm:grid-cols-3">
                 {generalRecommendations.map((recommendation, index) => (
-                  <Card key={index} className="overflow-hidden transition-all hover:shadow-md">
+                  <Card 
+                    key={index} 
+                    className="overflow-hidden transition-all hover:shadow-md dark:hover:shadow-primary/5 group"
+                  >
                     <CardHeader className="pb-2">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <div className="rounded-full bg-primary/10 p-2">
+                          <div className="rounded-full bg-primary/10 p-2 group-hover:bg-primary/20 dark:bg-primary/20 dark:group-hover:bg-primary/30 transition-colors">
                             <recommendation.icon className="h-4 w-4 text-primary" />
                           </div>
-                          <CardTitle className="text-base">{recommendation.title}</CardTitle>
+                          <CardTitle className="text-base group-hover:text-primary transition-colors">
+                            {recommendation.title}
+                          </CardTitle>
                         </div>
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-sm text-muted-foreground">{recommendation.description}</p>
+                      <p className="text-sm text-muted-foreground group-hover:text-muted-foreground/80 transition-colors">
+                        {recommendation.description}
+                      </p>
                     </CardContent>
                   </Card>
                 ))}
@@ -245,7 +257,11 @@ export function CarbonFootprintRecommendations({ results }: CarbonFootprintRecom
             </div>
 
             <div className="flex justify-center">
-              <Button className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 transition-all">
+              <Button 
+                className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 
+                dark:from-green-700 dark:to-emerald-800 dark:hover:from-green-800 dark:hover:to-emerald-900 
+                transition-all shadow-lg hover:shadow-xl dark:shadow-none dark:hover:shadow-primary/10"
+              >
                 Learn More About Reducing Your Carbon Footprint
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>

@@ -22,14 +22,14 @@ export function HeroSection() {
                 <Button
                   size="lg"
                   variant="secondary"
-                  className="font-semibold shadow-lg hover:shadow-xl transition-all duration-200 dark:bg-secondary/90 dark:hover:bg-secondary"
+                  className="font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
                 >
                   Get Started
                 </Button>
                 <Button
                   size="lg"
                   variant="outline"
-                  className="bg-white/10 text-white border-white/20 backdrop-blur-sm hover:bg-white/20 transition-all duration-200"
+                  className="bg-white/10 text-white border-white/20 backdrop-blur-sm hover:bg-white/20 transition-all duration-200 dark:bg-white/5 dark:hover:bg-white/15"
                 >
                   <PlayCircle className="mr-2 h-5 w-5" />
                   Listen Now
@@ -37,14 +37,11 @@ export function HeroSection() {
               </div>
             </div>
             <div className="hidden md:block">
-              <div className="relative overflow-hidden rounded-lg shadow-2xl">
-                <img
-                  alt="News and podcasts illustration"
-                  className="aspect-square object-cover transform hover:scale-105 transition-transform duration-200"
-                  src="/placeholder.svg?height=400&width=400"
-                />
-                <div className="absolute inset-0 bg-gradient-to-tr from-black/20 to-transparent dark:from-black/40 opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
-              </div>
+              <img
+                alt="News and podcasts illustration"
+                className="aspect-square object-cover rounded-lg shadow-2xl transform hover:scale-105 transition-transform duration-200 dark:shadow-lg dark:shadow-black/30"
+                src="/placeholder.svg?height=400&width=400"
+              />
             </div>
           </div>
         </div>
