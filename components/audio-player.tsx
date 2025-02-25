@@ -5,20 +5,15 @@ import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
 import { Play, Pause, SkipBack, SkipForward, Volume2, Minimize2, Maximize2, X } from "lucide-react"
 import { formatTime } from "@/lib/utils"
+import { useAudioPlayerStore } from "@/lib/store"
 
 export function AudioPlayer() {
+  const { isVisible, currentEpisode, setIsVisible } = useAudioPlayerStore()
   const [isPlaying, setIsPlaying] = useState(false)
   const [volume, setVolume] = useState([75])
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
   const [isMinimized, setIsMinimized] = useState(false)
-  const [currentEpisode, setCurrentEpisode] = useState<any>({
-    title: "The Future of AI in Everyday Life",
-    source: "Tech Talk Daily",
-    image: "/placeholder.svg?height=48&width=48",
-    audio: "https://example.com/audio.mp3", // This would be a real audio URL in production
-  })
-
   const audioRef = useRef<HTMLAudioElement | null>(null)
 
   useEffect(() => {
@@ -44,6 +39,16 @@ export function AudioPlayer() {
       audio.pause()
     }
   }, [])
+
+  // Update audio source when currentEpisode changes
+  useEffect(() => {
+    if (audioRef.current && currentEpisode?.audio) {
+      audioRef.current.src = currentEpisode.audio;
+      audioRef.current.load();
+      setIsPlaying(false);
+      setCurrentTime(0);
+    }
+  }, [currentEpisode])
 
   useEffect(() => {
     if (audioRef.current) {
@@ -87,7 +92,15 @@ export function AudioPlayer() {
     }
   }
 
-  if (!currentEpisode) return null
+  const handleClose = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+    }
+    setIsVisible(false);
+  }
+
+  if (!currentEpisode || !isVisible) return null
 
   return (
     <div
@@ -177,6 +190,7 @@ export function AudioPlayer() {
           <Button
             variant="ghost"
             size="icon"
+            onClick={handleClose}
             className="text-muted-foreground hover:text-foreground hover:bg-destructive/10 dark:hover:bg-destructive/20 transition-colors"
             aria-label="Close player"
           >

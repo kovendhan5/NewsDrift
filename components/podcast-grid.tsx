@@ -8,153 +8,8 @@ import { Play, Heart, Share2, Download, Clock } from "lucide-react"
 import { LoadingCard } from "@/components/loading-card"
 import Link from "next/link"
 import { ShareMenu } from "@/components/share-menu"
-
-// Mock podcast data
-const mockPodcasts = {
-  featured: [
-    {
-      id: "tech-talk-daily",
-      title: "Tech Talk Daily",
-      author: "Sarah Johnson",
-      image: "/placeholder.svg?height=300&width=300",
-      category: "Technology",
-      episodes: 156,
-      duration: "45 min",
-    },
-    {
-      id: "business-insights",
-      title: "Business Insights",
-      author: "Mark Williams",
-      image: "/placeholder.svg?height=300&width=300",
-      category: "Business",
-      episodes: 89,
-      duration: "30 min",
-    },
-    {
-      id: "health-matters",
-      title: "Health Matters",
-      author: "Dr. Emily Chen",
-      image: "/placeholder.svg?height=300&width=300",
-      category: "Health",
-      episodes: 112,
-      duration: "40 min",
-    },
-    {
-      id: "true-crime-stories",
-      title: "True Crime Stories",
-      author: "Detective John Smith",
-      image: "/placeholder.svg?height=300&width=300",
-      category: "True Crime",
-      episodes: 78,
-      duration: "60 min",
-    },
-    {
-      id: "science-explained",
-      title: "Science Explained",
-      author: "Professor Alex Turner",
-      image: "/placeholder.svg?height=300&width=300",
-      category: "Science",
-      episodes: 134,
-      duration: "35 min",
-    },
-    {
-      id: "comedy-hour",
-      title: "Comedy Hour",
-      author: "Lisa Brown",
-      image: "/placeholder.svg?height=300&width=300",
-      category: "Comedy",
-      episodes: 201,
-      duration: "50 min",
-    },
-  ],
-  trending: [
-    {
-      id: "daily-news-roundup",
-      title: "Daily News Roundup",
-      author: "News Network",
-      image: "/placeholder.svg?height=300&width=300",
-      category: "News",
-      episodes: 365,
-      duration: "25 min",
-    },
-    {
-      id: "financial-freedom",
-      title: "Financial Freedom",
-      author: "Robert Green",
-      image: "/placeholder.svg?height=300&width=300",
-      category: "Finance",
-      episodes: 67,
-      duration: "45 min",
-    },
-    {
-      id: "mindfulness-meditation",
-      title: "Mindfulness Meditation",
-      author: "Zen Master Kim",
-      image: "/placeholder.svg?height=300&width=300",
-      category: "Wellness",
-      episodes: 92,
-      duration: "20 min",
-    },
-    {
-      id: "history-uncovered",
-      title: "History Uncovered",
-      author: "Professor James Wilson",
-      image: "/placeholder.svg?height=300&width=300",
-      category: "History",
-      episodes: 104,
-      duration: "55 min",
-    },
-  ],
-  new: [
-    {
-      id: "future-tech",
-      title: "Future Tech",
-      author: "Tech Innovators",
-      image: "/placeholder.svg?height=300&width=300",
-      category: "Technology",
-      episodes: 12,
-      duration: "40 min",
-    },
-    {
-      id: "cooking-adventures",
-      title: "Cooking Adventures",
-      author: "Chef Maria Garcia",
-      image: "/placeholder.svg?height=300&width=300",
-      category: "Food",
-      episodes: 8,
-      duration: "35 min",
-    },
-    {
-      id: "travel-tales",
-      title: "Travel Tales",
-      author: "Nomad Explorers",
-      image: "/placeholder.svg?height=300&width=300",
-      category: "Travel",
-      episodes: 15,
-      duration: "50 min",
-    },
-  ],
-  subscribed: [
-    {
-      id: "tech-talk-daily",
-      title: "Tech Talk Daily",
-      author: "Sarah Johnson",
-      image: "/placeholder.svg?height=300&width=300",
-      category: "Technology",
-      episodes: 156,
-      duration: "45 min",
-    },
-    {
-      id: "mindfulness-meditation",
-      title: "Mindfulness Meditation",
-      author: "Zen Master Kim",
-      image: "/placeholder.svg?height=300&width=300",
-      category: "Wellness",
-      episodes: 92,
-      duration: "20 min",
-    },
-  ],
-}
+import { fetchPodcasts, type Podcast } from "@/lib/utils"
+import { useAudioPlayerStore } from "@/lib/store"
 
 interface PodcastGridProps {
   type: "featured" | "trending" | "new" | "subscribed"
@@ -162,17 +17,33 @@ interface PodcastGridProps {
 
 export function PodcastGrid({ type }: PodcastGridProps) {
   const [loading, setLoading] = useState(true)
-  const [podcasts, setPodcasts] = useState<any[]>([])
+  const [podcasts, setPodcasts] = useState<Podcast[]>([])
   const [favorites, setFavorites] = useState<string[]>([])
 
-  useEffect(() => {
-    // Simulate API call
-    const timer = setTimeout(() => {
-      setPodcasts(mockPodcasts[type] || [])
-      setLoading(false)
-    }, 1500)
+  const { setCurrentEpisode } = useAudioPlayerStore()
 
-    return () => clearTimeout(timer)
+  useEffect(() => {
+    async function loadPodcasts() {
+      setLoading(true)
+      let sort: 'popular' | 'new' | 'trending' | undefined;
+      
+      // Map grid type to API sort parameter
+      if (type === 'trending') sort = 'trending';
+      else if (type === 'new') sort = 'new';
+      else if (type === 'featured') sort = 'popular';
+      
+      // For subscribed type, we'll need to implement user-specific logic later
+      if (type !== 'subscribed') {
+        const data = await fetchPodcasts({ sort })
+        setPodcasts(data)
+      } else {
+        // TODO: Implement subscribed podcasts fetching
+        setPodcasts([])
+      }
+      setLoading(false)
+    }
+
+    loadPodcasts()
   }, [type])
 
   const toggleFavorite = (id: string) => {
@@ -206,7 +77,7 @@ export function PodcastGrid({ type }: PodcastGridProps) {
             <div className="relative">
               <Link href={`/podcasts/${podcast.id}`}>
                 <img
-                  src={podcast.image || "/placeholder.svg"}
+                  src={podcast.image}
                   alt={podcast.title}
                   className="w-full aspect-square object-cover transition-transform group-hover:scale-105"
                 />
@@ -226,7 +97,16 @@ export function PodcastGrid({ type }: PodcastGridProps) {
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <Button size="sm" className="flex-1">
+                <Button 
+                  size="sm" 
+                  className="flex-1"
+                  onClick={() => setCurrentEpisode({
+                    title: podcast.title,
+                    source: podcast.author,
+                    image: podcast.image,
+                    audio: `https://example.com/podcasts/${podcast.id}.mp3`, // This would be a real URL in production
+                  })}
+                >
                   <Play className="h-4 w-4 mr-1" />
                   Play
                 </Button>

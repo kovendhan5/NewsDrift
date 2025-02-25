@@ -6,45 +6,33 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { PlayCircle, Share2, Filter } from "lucide-react"
 import { LoadingCard } from "@/components/loading-card"
-
-const newsArticles = [
-  {
-    id: 1,
-    title: "The Future of AI in Everyday Life",
-    description:
-      "Exploring how artificial intelligence is transforming our daily routines and what to expect in the coming years.",
-    category: "Technology",
-    image: "/placeholder.svg?height=200&width=300",
-    date: "2024-02-24",
-  },
-  {
-    id: 2,
-    title: "Sustainable Living: Small Changes, Big Impact",
-    description: "Learn about simple lifestyle changes that can help reduce your environmental footprint.",
-    category: "Environment",
-    image: "/placeholder.svg?height=200&width=300",
-    date: "2024-02-24",
-  },
-]
+import { fetchArticles, type Article } from "@/lib/utils"
 
 export function NewsFeed() {
   const [loading, setLoading] = useState(true)
-  const [articles, setArticles] = useState(newsArticles)
+  const [articles, setArticles] = useState<Article[]>([])
+  const [sort, setSort] = useState<'latest' | 'popular' | 'trending'>('latest')
 
   useEffect(() => {
-    const timer = setTimeout(() => {
+    async function loadArticles() {
+      setLoading(true)
+      const data = await fetchArticles({ sort })
+      setArticles(data)
       setLoading(false)
-    }, 2000)
+    }
 
-    return () => clearTimeout(timer)
-  }, [])
+    loadArticles()
+  }, [sort])
 
   return (
     <section aria-label="Latest News Articles">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold tracking-tight">Latest News</h2>
         <div className="flex items-center gap-2">
-          <Select defaultValue="latest">
+          <Select 
+            value={sort}
+            onValueChange={(value) => setSort(value as typeof sort)}
+          >
             <SelectTrigger className="w-[140px] dark:shadow-none dark:hover:shadow-primary/10">
               <SelectValue placeholder="Sort by" />
             </SelectTrigger>
