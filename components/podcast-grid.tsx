@@ -8,8 +8,9 @@ import { Play, Heart, Share2, Download, Clock } from "lucide-react"
 import { LoadingCard } from "@/components/loading-card"
 import Link from "next/link"
 import { ShareMenu } from "@/components/share-menu"
-import { fetchPodcasts, type Podcast } from "@/lib/utils"
 import { useAudioPlayerStore } from "@/lib/store"
+import { PlaceholderImage } from "@/components/ui/placeholder-image"
+import { fetchPodcasts, type Podcast } from "@/lib/podcast-api"
 
 interface PodcastGridProps {
   type: "featured" | "trending" | "new" | "subscribed"
@@ -17,6 +18,7 @@ interface PodcastGridProps {
 
 export function PodcastGrid({ type }: PodcastGridProps) {
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [podcasts, setPodcasts] = useState<Podcast[]>([])
   const [favorites, setFavorites] = useState<string[]>([])
 
@@ -25,22 +27,28 @@ export function PodcastGrid({ type }: PodcastGridProps) {
   useEffect(() => {
     async function loadPodcasts() {
       setLoading(true)
-      let sort: 'popular' | 'new' | 'trending' | undefined;
-      
-      // Map grid type to API sort parameter
-      if (type === 'trending') sort = 'trending';
-      else if (type === 'new') sort = 'new';
-      else if (type === 'featured') sort = 'popular';
-      
-      // For subscribed type, we'll need to implement user-specific logic later
-      if (type !== 'subscribed') {
-        const data = await fetchPodcasts({ sort })
-        setPodcasts(data)
-      } else {
-        // TODO: Implement subscribed podcasts fetching
-        setPodcasts([])
+      setError(null)
+      try {
+        // Map grid type to API sort parameter
+        const sort = type === 'trending' ? 'trending' 
+                  : type === 'new' ? 'new'
+                  : type === 'featured' ? 'popular'
+                  : undefined;
+        
+        // For subscribed type, we'll need to implement user-specific logic later
+        if (type !== 'subscribed') {
+          const data = await fetchPodcasts({ sort })
+          setPodcasts(data)
+        } else {
+          // TODO: Implement subscribed podcasts fetching
+          setPodcasts([])
+        }
+      } catch (error) {
+        console.error('Failed to load podcasts:', error)
+        setError('Failed to load podcasts. Please try again later.')
+      } finally {
+        setLoading(false)
       }
-      setLoading(false)
     }
 
     loadPodcasts()
@@ -56,6 +64,21 @@ export function PodcastGrid({ type }: PodcastGridProps) {
         {Array.from({ length: 8 }).map((_, i) => (
           <LoadingCard key={i} />
         ))}
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-12">
+        <h3 className="text-lg font-medium text-red-500">{error}</h3>
+        <Button 
+          onClick={() => window.location.reload()} 
+          className="mt-4"
+          variant="outline"
+        >
+          Try Again
+        </Button>
       </div>
     )
   }
@@ -76,13 +99,19 @@ export function PodcastGrid({ type }: PodcastGridProps) {
           <CardContent className="p-0">
             <div className="relative">
               <Link href={`/podcasts/${podcast.id}`}>
-                <img
+                <PlaceholderImage
                   src={podcast.image}
                   alt={podcast.title}
+                  width={300}
+                  height={300}
                   className="w-full aspect-square object-cover transition-transform group-hover:scale-105"
                 />
               </Link>
-              <Badge className="absolute top-2 right-2 bg-primary/90 hover:bg-primary dark:bg-primary/80 dark:hover:bg-primary/90">{podcast.category}</Badge>
+              <Badge 
+                className="absolute top-2 right-2 bg-primary/90 hover:bg-primary dark:bg-primary/80 dark:hover:bg-primary/90"
+              >
+                {podcast.category}
+              </Badge>
             </div>
             <div className="p-4">
               <Link href={`/podcasts/${podcast.id}`} className="hover:underline">
@@ -101,14 +130,18 @@ export function PodcastGrid({ type }: PodcastGridProps) {
                   size="sm" 
                   className="flex-1"
                   onClick={() => setCurrentEpisode({
-                    title: podcast.title,
-                    source: podcast.author,
-                    image: podcast.image,
-                    audio: `https://example.com/podcasts/${podcast.id}.mp3`, // This would be a real URL in production
+                    isVisible: true,
+                    currentEpisode: {
+                      id: podcast.id,
+                      title: podcast.title,
+                      author: podcast.author,
+                      image: podcast.image,
+                      url: `https://example.com/podcasts/${podcast.id}/latest.mp3`, // This would be a real URL in production
+                    }
                   })}
                 >
                   <Play className="h-4 w-4 mr-1" />
-                  Play
+                  Play Latest
                 </Button>
                 <Button
                   size="icon"

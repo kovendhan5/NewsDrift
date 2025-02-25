@@ -3,38 +3,11 @@
 import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Heart, Share2, Bell, Star } from "lucide-react"
-import { ShareMenu } from "@/components/share-menu"
-
-// Mock podcast data
-const mockPodcastDetails = {
-  "tech-talk-daily": {
-    id: "tech-talk-daily",
-    title: "Tech Talk Daily",
-    author: "Sarah Johnson",
-    image: "/placeholder.svg?height=400&width=400",
-    category: "Technology",
-    description:
-      "A daily podcast covering the latest in technology news, trends, and interviews with industry leaders. Join Sarah Johnson as she explores the cutting edge of tech innovation.",
-    subscribers: "245K",
-    episodes: 156,
-    rating: 4.8,
-  },
-  "business-insights": {
-    id: "business-insights",
-    title: "Business Insights",
-    author: "Mark Williams",
-    image: "/placeholder.svg?height=400&width=400",
-    category: "Business",
-    description:
-      "Weekly discussions on business strategies, market trends, and entrepreneurship. Mark Williams brings years of experience to help you navigate the business world.",
-    subscribers: "189K",
-    episodes: 89,
-    rating: 4.6,
-  },
-}
+import { Badge } from "@/components/ui/badge"
+import { Heart, Star } from "lucide-react"
+import { PlaceholderImage } from "@/components/ui/placeholder-image"
+import { fetchPodcastDetails, type Podcast } from "@/lib/podcast-api"
 
 interface PodcastDetailsProps {
   id: string
@@ -42,18 +15,28 @@ interface PodcastDetailsProps {
 
 export function PodcastDetails({ id }: PodcastDetailsProps) {
   const [loading, setLoading] = useState(true)
-  const [podcast, setPodcast] = useState<any>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [podcast, setPodcast] = useState<Podcast | null>(null)
   const [isSubscribed, setIsSubscribed] = useState(false)
   const [isFavorite, setIsFavorite] = useState(false)
 
   useEffect(() => {
-    // Simulate API call
-    const timer = setTimeout(() => {
-      setPodcast(mockPodcastDetails[id as keyof typeof mockPodcastDetails] || null)
-      setLoading(false)
-    }, 1500)
+    async function loadPodcast() {
+      try {
+        setLoading(true)
+        setError(null)
+        const data = await fetchPodcastDetails(id)
+        setPodcast(data)
+      } catch (error) {
+        console.error('Failed to load podcast details:', error)
+        setError('Failed to load podcast details. Please try again later.')
+        setPodcast(null)
+      } finally {
+        setLoading(false)
+      }
+    }
 
-    return () => clearTimeout(timer)
+    loadPodcast()
   }, [id])
 
   if (loading) {
@@ -71,103 +54,96 @@ export function PodcastDetails({ id }: PodcastDetailsProps) {
     )
   }
 
+  if (error) {
+    return (
+      <div className="text-center py-8">
+        <h3 className="text-lg font-medium text-red-500">{error}</h3>
+        <Button 
+          onClick={() => window.location.reload()} 
+          className="mt-4"
+          variant="outline"
+        >
+          Try Again
+        </Button>
+      </div>
+    )
+  }
+
   if (!podcast) {
     return (
-      <div className="text-center py-12">
+      <div className="text-center py-8">
         <h3 className="text-lg font-medium">Podcast not found</h3>
-        <p className="text-muted-foreground mt-2">The podcast you're looking for doesn't exist or has been removed</p>
+        <p className="text-muted-foreground mt-2">The podcast you're looking for doesn't exist or has been removed.</p>
+        <Button
+          variant="outline"
+          asChild
+          className="mt-4"
+        >
+          <Link href="/podcasts">
+            Browse All Podcasts
+          </Link>
+        </Button>
       </div>
     )
   }
 
   return (
-    <Card className="group hover:shadow-lg dark:hover:shadow-primary/5 transition-all duration-300">
-      <CardContent className="p-6 space-y-6">
-        <div className="relative overflow-hidden rounded-lg">
-          <img
-            src={podcast.image || "/placeholder.svg"}
-            alt={podcast.title}
-            className="w-full aspect-square object-cover rounded-lg transition-transform duration-300 group-hover:scale-105"
-          />
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 dark:group-hover:bg-black/20 transition-colors duration-300" />
-          <Badge 
-            className="absolute top-2 right-2 bg-primary/90 hover:bg-primary dark:bg-primary/80 dark:hover:bg-primary/90 transition-colors"
-          >
-            {podcast.category}
-          </Badge>
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold group-hover:text-primary transition-colors duration-200">{podcast.title}</h1>
-          <p className="text-muted-foreground group-hover:text-muted-foreground/80 transition-colors duration-200">
-            {podcast.author}
-          </p>
-        </div>
-        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-          <div className="flex items-center group/rating">
-            <Star className="h-4 w-4 text-yellow-500 dark:text-yellow-400 mr-1 transition-transform group-hover/rating:scale-110" />
-            <span className="group-hover/rating:text-yellow-500 dark:group-hover/rating:text-yellow-400 transition-colors">
-              {podcast.rating}
-            </span>
-          </div>
-          <div className="group/subs hover:text-primary transition-colors">
-            <span className="group-hover/subs:text-primary transition-colors">{podcast.subscribers}</span> subscribers
-          </div>
-          <div className="group/eps hover:text-primary transition-colors">
-            <span className="group-hover/eps:text-primary transition-colors">{podcast.episodes}</span> episodes
-          </div>
-        </div>
-        <p className="text-sm text-muted-foreground group-hover:text-muted-foreground/80 transition-colors duration-200">
-          {podcast.description}
+    <div className="space-y-4 group">
+      <div className="relative">
+        <PlaceholderImage
+          src={podcast.image}
+          alt={podcast.title}
+          width={400}
+          height={400}
+          className="w-full aspect-square object-cover rounded-lg transition-transform duration-300 group-hover:scale-105"
+        />
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 dark:group-hover:bg-black/20 transition-colors duration-300" />
+        <Badge 
+          className="absolute top-2 right-2 bg-primary/90 hover:bg-primary dark:bg-primary/80 dark:hover:bg-primary/90 transition-colors"
+        >
+          {podcast.category}
+        </Badge>
+      </div>
+      <div>
+        <h1 className="text-2xl font-bold group-hover:text-primary transition-colors duration-200">{podcast.title}</h1>
+        <p className="text-muted-foreground group-hover:text-muted-foreground/80 transition-colors duration-200">
+          {podcast.author}
         </p>
-        <div className="flex items-center gap-2">
-          <Button 
-            className={`flex-1 shadow-sm hover:shadow-md dark:shadow-none dark:hover:shadow-primary/10 transition-all 
-              ${isSubscribed 
-                ? 'bg-primary/90 hover:bg-primary/80 dark:bg-primary/80 dark:hover:bg-primary/70' 
-                : ''}`
-            }
-            onClick={() => setIsSubscribed(!isSubscribed)}
-          >
-            {isSubscribed ? (
-              <>
-                <Bell className="h-4 w-4 mr-2 fill-current animate-in zoom-in duration-200" />
-                Subscribed
-              </>
-            ) : (
-              <>
-                <Bell className="h-4 w-4 mr-2 animate-in zoom-in duration-200" />
-                Subscribe
-              </>
-            )}
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => setIsFavorite(!isFavorite)}
-            aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
-            className="shadow-sm hover:shadow-md dark:shadow-none dark:hover:shadow-primary/10 transition-all hover:scale-105 dark:border-muted/50"
-          >
-            <Heart 
-              className={`h-4 w-4 transition-all duration-200 ${
-                isFavorite 
-                  ? "fill-red-500 text-red-500 scale-110" 
-                  : "hover:text-red-500"
-              }`} 
-            />
-          </Button>
-          <ShareMenu url={`/podcasts/${podcast.id}`} title={podcast.title}>
-            <Button 
-              variant="outline" 
-              size="icon" 
-              aria-label="Share podcast"
-              className="shadow-sm hover:shadow-md dark:shadow-none dark:hover:shadow-primary/10 transition-all hover:scale-105 dark:border-muted/50"
-            >
-              <Share2 className="h-4 w-4" />
-            </Button>
-          </ShareMenu>
+      </div>
+      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+        <div className="flex items-center group/rating">
+          <Star className="h-4 w-4 text-yellow-500 dark:text-yellow-400 mr-1 transition-transform group-hover/rating:scale-110" />
+          <span className="group-hover/rating:text-yellow-500 dark:group-hover/rating:text-yellow-400 transition-colors">
+            {podcast.rating}
+          </span>
         </div>
-      </CardContent>
-    </Card>
+        <div className="group/subs hover:text-primary transition-colors">
+          <span className="group-hover/subs:text-primary transition-colors">{podcast.subscribers}</span> subscribers
+        </div>
+        <div className="group/eps hover:text-primary transition-colors">
+          <span className="group-hover/eps:text-primary transition-colors">{podcast.episodes}</span> episodes
+        </div>
+      </div>
+      <p className="text-sm text-muted-foreground group-hover:text-muted-foreground/80 transition-colors duration-200">
+        {podcast.description}
+      </p>
+      <div className="flex items-center gap-2">
+        <Button 
+          className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 dark:from-green-700 dark:to-emerald-800 dark:hover:from-green-800 dark:hover:to-emerald-900"
+          onClick={() => setIsSubscribed(!isSubscribed)}
+        >
+          {isSubscribed ? 'Subscribed' : 'Subscribe'}
+        </Button>
+        <Button
+          size="icon"
+          variant="outline"
+          onClick={() => setIsFavorite(!isFavorite)}
+          className={`transition-colors ${isFavorite ? 'border-red-500 hover:border-red-600' : ''}`}
+        >
+          <Heart className={`h-4 w-4 ${isFavorite ? 'fill-red-500 text-red-500' : ''}`} />
+        </Button>
+      </div>
+    </div>
   )
 }
 

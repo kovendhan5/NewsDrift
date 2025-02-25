@@ -36,12 +36,15 @@ export function HeroSection() {
                 </Button>
               </div>
             </div>
-            <div className="hidden md:block">
+            <div className="relative aspect-video w-full overflow-hidden rounded-lg md:aspect-square lg:aspect-video xl:aspect-square">
               <img
-                alt="News and podcasts illustration"
-                className="aspect-square object-cover rounded-lg shadow-2xl transform hover:scale-105 transition-transform duration-200 dark:shadow-lg dark:shadow-black/30"
-                src="/placeholder.svg?height=400&width=400"
+                alt="Featured content cover"
+                className="object-cover transition-transform duration-300 hover:scale-105"
+                height={400}
+                src="https://images.unsplash.com/photo-1495020689067-958852a7765e?w=400&h=400&fit=crop&q=80"
+                width={400}
               />
+              <div className="absolute inset-0 bg-black/0 hover:bg-black/5 dark:hover:bg-black/20 transition-colors duration-300" />
             </div>
           </div>
         </div>

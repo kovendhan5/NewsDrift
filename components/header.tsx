@@ -15,10 +15,17 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { useState } from "react"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { useTheme } from "next-themes"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { useUser } from "@/components/user-provider"
+import { useAuth0 } from "@auth0/auth0-react"
+import { Spinner } from "@/components/ui/spinner"
 
 export function Header() {
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const { setTheme } = useTheme()
+  const { user, loading } = useUser();
+  const { loginWithRedirect, logout } = useAuth0();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -115,14 +122,16 @@ export function Header() {
                 <NavigationMenuLink className={navigationMenuTriggerStyle()}>Podcasts</NavigationMenuLink>
               </Link>
             </NavigationMenuItem>
-            <NavigationMenuItem>
-              <Link href="/carbon-footprint" legacyBehavior passHref>
-                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                  <Leaf className="h-4 w-4 mr-1 text-green-500" />
-                  Carbon Footprint
-                </NavigationMenuLink>
-              </Link>
-            </NavigationMenuItem>
+            {user && (
+              <NavigationMenuItem>
+                <Link href="/carbon-footprint" legacyBehavior passHref>
+                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                    <Leaf className="h-4 w-4 mr-1 text-green-500" />
+                    Carbon Footprint
+                  </NavigationMenuLink>
+                </Link>
+              </NavigationMenuItem>
+            )}
           </NavigationMenuList>
         </NavigationMenu>
 
@@ -157,14 +166,40 @@ export function Header() {
             </Button>
           )}
           <ThemeToggle />
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label="User profile"
-            className="hover:bg-primary/10 transition-colors"
-          >
-            <User className="h-5 w-5" />
-          </Button>
+          {loading ? (
+            <Button variant="ghost" size="icon" disabled>
+              <Spinner className="h-5 w-5" />
+            </Button>
+          ) : user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={user.auth0Id} alt={user.name || 'User avatar'} />
+                    <AvatarFallback>{user.name?.charAt(0) || 'U'}</AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" align="end" forceMount>
+                <DropdownMenuItem 
+                  className="text-muted-foreground"
+                >
+                  {user.email}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => logout()}>
+                  Log out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button 
+              variant="default"
+              onClick={() => loginWithRedirect()}
+              className="shadow-sm hover:shadow-md dark:shadow-none dark:hover:shadow-primary/10 transition-all"
+            >
+              Sign In
+            </Button>
+          )}
         </div>
       </div>
     </header>

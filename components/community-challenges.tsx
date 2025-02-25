@@ -44,11 +44,11 @@ const mockChallenges = [
 
 // Mock leaderboard data
 const mockLeaderboard = [
-  { id: "u1", name: "Sarah J.", avatar: "/placeholder.svg?height=40&width=40", points: 1250 },
-  { id: "u2", name: "Michael T.", avatar: "/placeholder.svg?height=40&width=40", points: 980 },
-  { id: "u3", name: "Emma W.", avatar: "/placeholder.svg?height=40&width=40", points: 875 },
-  { id: "u4", name: "David L.", avatar: "/placeholder.svg?height=40&width=40", points: 720 },
-  { id: "u5", name: "Jessica M.", avatar: "/placeholder.svg?height=40&width=40", points: 650 },
+  { id: "u1", name: "Sarah J.", avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&q=80", points: 1250 },
+  { id: "u2", name: "Michael T.", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=40&h=40&fit=crop&q=80", points: 980 },
+  { id: "u3", name: "Emma W.", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=40&h=40&fit=crop&q=80", points: 875 },
+  { id: "u4", name: "David L.", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&q=80", points: 720 },
+  { id: "u5", name: "Jessica M.", avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&q=80", points: 650 },
 ]
 
 export function CommunityChallenges() {

@@ -6,23 +6,58 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { PlayCircle, Share2, Filter } from "lucide-react"
 import { LoadingCard } from "@/components/loading-card"
-import { fetchArticles, type Article } from "@/lib/utils"
+import { PlaceholderImage } from "@/components/ui/placeholder-image"
+import { fetchNews } from "@/lib/news-api"
+
+interface Article {
+  title: string;
+  description: string;
+  url: string;
+  urlToImage: string | null;
+  publishedAt: string;
+  source: {
+    name: string;
+  };
+}
 
 export function NewsFeed() {
   const [loading, setLoading] = useState(true)
   const [articles, setArticles] = useState<Article[]>([])
   const [sort, setSort] = useState<'latest' | 'popular' | 'trending'>('latest')
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     async function loadArticles() {
-      setLoading(true)
-      const data = await fetchArticles({ sort })
-      setArticles(data)
-      setLoading(false)
+      try {
+        setLoading(true)
+        setError(null)
+        const data = await fetchNews({ 
+          category: sort === 'latest' ? 'general' : undefined,
+          q: sort === 'trending' ? 'trending' : undefined,
+          pageSize: 10
+        })
+        setArticles(data.articles)
+      } catch (err) {
+        console.error('Failed to fetch articles:', err)
+        setError('Failed to load articles. Please try again later.')
+      } finally {
+        setLoading(false)
+      }
     }
 
     loadArticles()
   }, [sort])
+
+  if (error) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-red-500">{error}</p>
+        <Button onClick={() => window.location.reload()} className="mt-4">
+          Try Again
+        </Button>
+      </div>
+    )
+  }
 
   return (
     <section aria-label="Latest News Articles">
@@ -42,53 +77,52 @@ export function NewsFeed() {
               <SelectItem value="trending">Trending</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outline" size="icon" aria-label="Filter articles">
-            <Filter className="h-4 w-4" />
-          </Button>
         </div>
       </div>
-      <div className="space-y-6">
-        {loading
-          ? Array.from({ length: 3 }).map((_, i) => <LoadingCard key={i} />)
-          : articles.map((article) => (
-              <Card 
-                key={article.id}
-                className="overflow-hidden group hover:shadow-md dark:hover:shadow-primary/5 transition-all"
-              >
-                <CardContent className="p-6">
-                  <div className="flex flex-col md:flex-row gap-6">
-                    <div className="relative md:w-1/3 aspect-video md:aspect-square overflow-hidden rounded-lg">
-                      <img
-                        src={article.image}
-                        alt={article.title}
-                        className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 dark:group-hover:bg-black/20 transition-colors duration-300" />
-                    </div>
-                    <div className="md:w-2/3 space-y-4">
-                      <div>
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm font-medium text-primary">{article.category}</span>
-                          <time className="text-sm text-muted-foreground">{article.date}</time>
-                        </div>
-                        <h3 className="text-xl font-semibold group-hover:text-primary transition-colors">
-                          {article.title}
-                        </h3>
-                      </div>
-                      <p className="text-muted-foreground group-hover:text-muted-foreground/80 transition-colors">
-                        {article.description}
-                      </p>
-                      <Button 
-                        className="shadow-sm hover:shadow-md dark:shadow-none dark:hover:shadow-primary/10 transition-all"
-                      >
-                        Read More
-                      </Button>
+
+      {loading ? (
+        <div className="space-y-4">
+          {[...Array(3)].map((_, i) => (
+            <LoadingCard key={i} />
+          ))}
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {articles.map((article, i) => (
+            <Card key={i} className="overflow-hidden">
+              <CardContent className="p-0">
+                <a 
+                  href={article.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="grid md:grid-cols-[2fr_1fr] gap-4 p-6"
+                >
+                  <div className="space-y-2">
+                    <CardTitle className="line-clamp-2">{article.title}</CardTitle>
+                    <p className="text-sm text-muted-foreground line-clamp-2">{article.description}</p>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <span>{article.source.name}</span>
+                      <span>•</span>
+                      <span>{new Date(article.publishedAt).toLocaleDateString()}</span>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
-      </div>
+                  <div className="relative aspect-video md:aspect-square">
+                    {article.urlToImage ? (
+                      <img
+                        src={article.urlToImage}
+                        alt=""
+                        className="object-cover rounded-lg w-full h-full"
+                      />
+                    ) : (
+                      <PlaceholderImage className="w-full h-full rounded-lg" />
+                    )}
+                  </div>
+                </a>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
     </section>
   )
 }
