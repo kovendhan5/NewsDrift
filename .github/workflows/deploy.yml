@@ -40,27 +40,26 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v4
       
-      - name: Get npm cache directory
-        id: npm-cache-dir
-        run: echo "dir=$(npm config get cache)" >> $GITHUB_OUTPUT
-      
-      - name: Cache dependencies
+      - name: Cache node_modules
         uses: actions/cache@v4
+        id: cache-node-modules
         with:
-          path: ${{ steps.npm-cache-dir.outputs.dir }}
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/package.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-            ${{ runner.os }}-node-
+          path: node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
       
-      - name: Clean install dependencies
-        run: npm ci --prefer-offline
-      
+      - name: Install dependencies
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        run: |
+          npm ci
+          npm ls
+        
       - name: Build with Next.js
-        run: npm run build
+        run: |
+          npm run build
         env:
           NEXT_PUBLIC_BASE_PATH: /NewsDrift
           NODE_ENV: production
+          CI: true
       
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

@@ -1,14 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     output: 'export',
-    basePath: process.env.NEXT_PUBLIC_BASE_PATH || '/NewsDrift',
+    basePath: process.env.NEXT_PUBLIC_BASE_PATH || '',
     images: {
         unoptimized: true,
-        remotePatterns: [],
     },
-    assetPrefix: process.env.NEXT_PUBLIC_BASE_PATH || '/NewsDrift',
+    assetPrefix: process.env.NEXT_PUBLIC_BASE_PATH || '',
     trailingSlash: true,
-    reactStrictMode: true,
 }
 
 export default nextConfig;
