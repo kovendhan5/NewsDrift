@@ -4,8 +4,11 @@ const nextConfig = {
     basePath: process.env.NEXT_PUBLIC_BASE_PATH || '/NewsDrift',
     images: {
         unoptimized: true,
+        remotePatterns: [],
     },
     assetPrefix: process.env.NEXT_PUBLIC_BASE_PATH || '/NewsDrift',
+    trailingSlash: true,
+    reactStrictMode: true,
 }
 
 export default nextConfig;
