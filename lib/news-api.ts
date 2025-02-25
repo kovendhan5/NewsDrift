@@ -1,4 +1,6 @@
 import { cacheData, getCachedData } from './redis';
+import { withRetry } from './retry';
+import config from './config';
 
 // NewsAPI base URL
 const NEWS_API_URL = 'https://newsapi.org/v2';
@@ -43,17 +45,15 @@ export async function fetchNews(params: NewsAPIParams): Promise<NewsResponse> {
     sortBy = 'publishedAt'
   } = params;
 
-  // Generate cache key based on params
-  const cacheKey = `news:${category || 'all'}:${q || 'none'}:${pageSize}:${page}:${language}:${sortBy}`;
+  const cacheKey = `${config.cache.news.prefix}${category || 'all'}:${q || 'none'}:${pageSize}:${page}:${language}:${sortBy}`;
 
   // Try to get from cache first
   const cached = await getCachedData<NewsResponse>(cacheKey);
   if (cached) return cached;
 
-  try {
-    // Build query parameters
+  const fetchWithRetry = () => withRetry(async () => {
     const queryParams = new URLSearchParams({
-      apiKey: API_KEY || '',
+      apiKey: config.newsApi.apiKey || '',
       pageSize: pageSize.toString(),
       page: page.toString(),
       language,
@@ -63,25 +63,59 @@ export async function fetchNews(params: NewsAPIParams): Promise<NewsResponse> {
     if (category) queryParams.append('category', category);
     if (q) queryParams.append('q', q);
 
-    // Determine which endpoint to use
     const endpoint = category ? 'top-headlines' : 'everything';
-    const url = `${NEWS_API_URL}/${endpoint}?${queryParams.toString()}`;
+    const url = `${config.newsApi.baseUrl}/${endpoint}?${queryParams.toString()}`;
 
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      headers: {
+        'Accept': 'application/json',
+        'User-Agent': `${config.app.name}/${process.env.npm_package_version || '1.0.0'}`
+      },
+      next: { revalidate: config.cache.news.ttl }
+    });
     
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.message || 'Failed to fetch news');
+      throw new Error(error.message || `Failed to fetch news: ${response.statusText}`);
     }
 
-    const data: NewsResponse = await response.json();
+    return response.json() as Promise<NewsResponse>;
+  }, {
+    maxAttempts: 3,
+    shouldRetry: (error) => {
+      // Retry on network errors or API rate limits
+      if (error instanceof Error) {
+        return error.message.includes('network') ||
+               error.message.includes('timeout') ||
+               error.message.includes('429') || // Too Many Requests
+               error.message.includes('503') || // Service Unavailable
+               error.message.includes('504');   // Gateway Timeout
+      }
+      return false;
+    }
+  });
 
-    // Cache successful responses for 15 minutes (900 seconds)
-    await cacheData(cacheKey, data, 900);
+  try {
+    const data = await fetchWithRetry();
+    
+    if (data.status === 'error') {
+      throw new Error(data.message || 'News API returned an error');
+    }
 
+    // Cache successful responses
+    await cacheData(cacheKey, data, config.cache.news.ttl);
+    
     return data;
   } catch (error) {
     console.error('News API Error:', error);
-    throw error;
+    // Transform error for client consumption
+    const clientError = new Error(
+      error instanceof Error 
+        ? error.message.includes('429') 
+          ? 'Rate limit exceeded. Please try again later.'
+          : error.message
+        : 'Failed to fetch news'
+    );
+    throw clientError;
   }
 }

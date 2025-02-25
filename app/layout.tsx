@@ -5,6 +5,8 @@ import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Auth0ProviderWrapper } from "@/components/auth0-provider"
 import { UserProvider } from "@/components/user-provider"
+import { NewsProvider } from "@/components/news-provider"
+import { ErrorBoundary } from "@/components/error-boundary"
 import { Analytics } from "@vercel/analytics/react"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -31,16 +33,25 @@ export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <Auth0ProviderWrapper>
-          <UserProvider>
-            <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-              <main className="min-h-screen bg-background">
-                {children}
-              </main>
-              <Analytics />
-            </ThemeProvider>
-          </UserProvider>
-        </Auth0ProviderWrapper>
+        <ErrorBoundary>
+          <Auth0ProviderWrapper>
+            <UserProvider>
+              <NewsProvider>
+                <ThemeProvider 
+                  attribute="class" 
+                  defaultTheme="system" 
+                  enableSystem 
+                  disableTransitionOnChange
+                >
+                  <main className="min-h-screen bg-background">
+                    {children}
+                  </main>
+                  <Analytics />
+                </ThemeProvider>
+              </NewsProvider>
+            </UserProvider>
+          </Auth0ProviderWrapper>
+        </ErrorBoundary>
       </body>
     </html>
   )
