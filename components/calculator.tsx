@@ -109,62 +109,51 @@ export function CarbonFootprintCalculator() {
   }
 
   function calculateDietFootprint(diet: FormValues["diet"]) {
-    const meatEmissionFactor = 2.5 // kg CO2 per meal
-    const vegetarianEmissionFactor = 0.5 // kg CO2 per meal
-    const mealsPerWeek = 21 // assumption: 3 meals per day
-    
-    const vegetarianEmissions = diet.vegetarianMeals * vegetarianEmissionFactor * 52 // Annual
-    const meatEmissions = (mealsPerWeek - diet.vegetarianMeals) * meatEmissionFactor * 52 // Annual
-    
-    // Local food consumption factor
+    // Simplified calculation for demonstration
+    const meatMeals = 21 - diet.vegetarianMeals // Assuming 3 meals a day, 7 days a week
+    const meatEmission = meatMeals * 3.3 * 52 // kg CO2 per meal, annual
+    const vegetarianEmission = diet.vegetarianMeals * 1.4 * 52 // kg CO2 per meal, annual
+
     const localFoodFactors = {
-      always: 0.7,
-      often: 0.8,
-      sometimes: 0.9,
-      rarely: 1.0,
+      never: 1.0,
+      rarely: 0.9,
+      often: 0.7,
+      always: 0.5,
     }
-    const localFactor = localFoodFactors[diet.localFoodConsumption as keyof typeof localFoodFactors] || 1.0
-    
-    return (vegetarianEmissions + meatEmissions) * localFactor
+
+    const localFoodFactor = localFoodFactors[diet.localFoodConsumption as keyof typeof localFoodFactors] || 1.0
+
+    return (meatEmission + vegetarianEmission) * localFoodFactor
   }
 
   function calculateEnergyFootprint(energy: FormValues["energy"]) {
-    const kwhEmissionFactor = 0.92 // kg CO2 per kWh (grid average)
-    const renewableEmissionFactor = 0.05 // kg CO2 per kWh (renewable)
-    
+    // Simplified calculation for demonstration
+    const electricityEmission = energy.electricityUsage * 0.92 * 12 // kg CO2 per kWh, annual
     const renewablePercentage = energy.renewablePercentage[0] / 100
-    const gridPercentage = 1 - renewablePercentage
-    
-    const gridEmissions = energy.electricityUsage * gridPercentage * kwhEmissionFactor * 12 // Annual
-    const renewableEmissions = energy.electricityUsage * renewablePercentage * renewableEmissionFactor * 12 // Annual
-    
-    return gridEmissions + renewableEmissions
+
+    return electricityEmission * (1 - renewablePercentage)
   }
 
   function calculateShoppingFootprint(shopping: FormValues["shopping"]) {
-    // Base shopping footprint (average person)
-    const baseShoppingEmissions = 1200 // kg CO2 per year
-    
-    // Online shopping frequency factors
+    // Simplified calculation for demonstration
     const onlineShoppingFactors = {
-      never: 1.0,
-      rarely: 0.95,
-      sometimes: 0.9,
-      often: 0.85,
-      always: 0.8,
+      never: 0,
+      rarely: 100,
+      sometimes: 300,
+      often: 600,
     }
-    
-    // Sustainable products factors
-    const sustainableFactors = {
+
+    const sustainableProductFactors = {
       yes: 0.7,
-      sometimes: 0.85,
       no: 1.0,
     }
-    
-    const onlineFactor = onlineShoppingFactors[shopping.onlineShopping as keyof typeof onlineShoppingFactors] || 1.0
-    const sustainableFactor = sustainableFactors[shopping.sustainableProducts as keyof typeof sustainableFactors] || 1.0
-    
-    return baseShoppingEmissions * onlineFactor * sustainableFactor
+
+    const onlineShoppingEmission =
+      onlineShoppingFactors[shopping.onlineShopping as keyof typeof onlineShoppingFactors] || 300
+    const sustainableFactor =
+      sustainableProductFactors[shopping.sustainableProducts as keyof typeof sustainableProductFactors] || 1.0
+
+    return onlineShoppingEmission * sustainableFactor
   }
 
   return (

@@ -4,35 +4,6 @@ const nextConfig = {
     basePath: process.env.NEXT_PUBLIC_BASE_PATH || '',
     images: {
         unoptimized: true,
-        domains: [
-            'images.unsplash.com',
-            'source.unsplash.com',
-            'cdn.pixabay.com',
-            'www.reuters.com',
-            'www.nytimes.com',
-            'www.theguardian.com',
-            'www.bbc.co.uk',
-            'techcrunch.com',
-            'i.kinja-img.com',
-            'cdn.cnn.com',
-            'media.wired.com',
-            'images.wsj.net',
-            'img.huffingtonpost.com',
-            'static01.nyt.com',
-            'media.npr.org',
-            'assets.bwbx.io',
-            'ichef.bbci.co.uk',
-            'assets.publishing.service.gov.uk',
-            'storage.googleapis.com',
-            's.yimg.com',
-            'assets.example.com'
-        ],
-        remotePatterns: [
-            {
-                protocol: 'https',
-                hostname: '**',
-            },
-        ],
     },
     assetPrefix: process.env.NEXT_PUBLIC_BASE_PATH || '',
     trailingSlash: true,
@@ -59,12 +30,17 @@ const nextConfig = {
             },
         ]
     },
-    typescript: {
-        ignoreBuildErrors: true,
-    },
-    experimental: {
-        serverActions: true,
-    },
+    webpack: (config, { isServer }) => {
+        if (!isServer) {
+            config.resolve.fallback = {
+                ...config.resolve.fallback,
+                dns: false,
+                net: false,
+                fs: false
+            };
+        }
+        return config;
+    }
 };
 
 export default nextConfig;

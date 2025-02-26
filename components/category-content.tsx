@@ -1,12 +1,13 @@
 "use client"
 
-import { useState, useEffect, ReactNode } from "react"
+import { useState, useEffect } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Filter } from "lucide-react"
 import { LoadingCard } from "@/components/loading-card"
+import { NewsFeed } from "@/components/news-feed"
 import { PodcastGrid } from "@/components/podcast-grid"
 
 // Mock category data
@@ -43,10 +44,9 @@ const mockCategoryData = {
 
 interface CategoryContentProps {
   id: string
-  children?: ReactNode
 }
 
-export function CategoryContent({ id, children }: CategoryContentProps) {
+export function CategoryContent({ id }: CategoryContentProps) {
   const [loading, setLoading] = useState(true)
   const [category, setCategory] = useState<any>(null)
 
@@ -124,7 +124,7 @@ export function CategoryContent({ id, children }: CategoryContentProps) {
               </Button>
             </div>
           </div>
-          {children}
+          <NewsFeed />
         </TabsContent>
 
         <TabsContent value="podcasts" className="mt-0">

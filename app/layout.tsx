@@ -5,53 +5,29 @@ import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Auth0ProviderWrapper } from "@/components/auth0-provider"
 import { UserProvider } from "@/components/user-provider"
-import { NewsProvider } from "@/components/news-provider"
-import { ErrorBoundary } from "@/components/error-boundary"
-import { Analytics } from "@vercel/analytics/react"
 
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "News & Podcast Aggregator",
-  description: "Your one-stop destination for latest news and podcasts",
-  keywords: [
-    "news",
-    "podcasts",
-    "technology",
-    "environment",
-    "science",
-    "sustainability",
-    "carbon footprint",
-  ],
+  title: "News Aggregator",
+  description: "Your personalized news and podcast platform",
 }
 
-interface RootLayoutProps {
+export default function RootLayout({
+  children,
+}: Readonly<{
   children: React.ReactNode
-}
-
-export default function RootLayout({ children }: RootLayoutProps) {
+}>) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <ErrorBoundary>
-          <Auth0ProviderWrapper>
-            <UserProvider>
-              <NewsProvider>
-                <ThemeProvider 
-                  attribute="class" 
-                  defaultTheme="system" 
-                  enableSystem 
-                  disableTransitionOnChange
-                >
-                  <main className="min-h-screen bg-background">
-                    {children}
-                  </main>
-                  <Analytics />
-                </ThemeProvider>
-              </NewsProvider>
-            </UserProvider>
-          </Auth0ProviderWrapper>
-        </ErrorBoundary>
+        <Auth0ProviderWrapper>
+          <UserProvider>
+            <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+              {children}
+            </ThemeProvider>
+          </UserProvider>
+        </Auth0ProviderWrapper>
       </body>
     </html>
   )

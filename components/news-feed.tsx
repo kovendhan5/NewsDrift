@@ -1,218 +1,97 @@
 "use client"
 
-import { useEffect } from "react"
-import { Card, CardContent } from "@/components/ui/card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useState, useEffect } from "react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Clock, RefreshCw, ChevronLeft, ChevronRight } from "lucide-react"
-import { formatDistanceToNow } from "date-fns"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { PlayCircle, Share2, Filter } from "lucide-react"
 import { LoadingCard } from "@/components/loading-card"
-import { useNewsStore } from "@/lib/store"
-import { fetchNews } from "@/lib/news-api"
+import { fetchArticles, type Article } from "@/lib/utils"
 import { PlaceholderImage } from "@/components/ui/placeholder-image"
-import { Search } from "@/components/search"
 
-const NEWS_CATEGORIES = [
-  { value: "general", label: "General" },
-  { value: "technology", label: "Technology" },
-  { value: "business", label: "Business" },
-  { value: "entertainment", label: "Entertainment" },
-  { value: "health", label: "Health" },
-  { value: "science", label: "Science" },
-  { value: "sports", label: "Sports" }
-] as const;
-
-const SORT_OPTIONS = [
-  { value: "publishedAt", label: "Latest" },
-  { value: "popularity", label: "Most Popular" },
-  { value: "relevancy", label: "Most Relevant" }
-] as const;
-
-interface NewsFeedProps {
-  hideControls?: boolean;
-}
-
-export function NewsFeed({ hideControls = false }: NewsFeedProps) {
-  const {
-    articles,
-    category,
-    sortBy,
-    page,
-    pageSize,
-    totalResults,
-    isLoading,
-    error,
-    searchQuery,
-    setCategory,
-    setSortBy,
-    setPage,
-    setArticles,
-    setLoading,
-    setError,
-    setSearchQuery
-  } = useNewsStore()
+export function NewsFeed() {
+  const [loading, setLoading] = useState(true)
+  const [articles, setArticles] = useState<Article[]>([])
+  const [sort, setSort] = useState<'latest' | 'popular' | 'trending'>('latest')
 
   useEffect(() => {
     async function loadArticles() {
-      try {
-        setLoading(true)
-        setError(null)
-        const data = await fetchNews({
-          category,
-          sortBy,
-          page,
-          pageSize,
-          language: 'en',
-          q: searchQuery
-        })
-        setArticles(data)
-      } catch (err) {
-        console.error('Failed to fetch articles:', err)
-        setError(err instanceof Error ? err.message : 'Failed to load articles')
-      } finally {
-        setLoading(false)
-      }
+      setLoading(true)
+      const data = await fetchArticles({ sort })
+      setArticles(data)
+      setLoading(false)
     }
 
     loadArticles()
-  }, [category, sortBy, page, searchQuery])
-
-  const totalPages = Math.ceil(totalResults / pageSize)
-
-  if (error) {
-    return (
-      <div className="text-center py-8">
-        <p className="text-red-500 mb-4">{error}</p>
-        <Button 
-          onClick={() => window.location.reload()} 
-          variant="outline"
-          className="gap-2"
-        >
-          <RefreshCw className="h-4 w-4" />
-          Try Again
-        </Button>
-      </div>
-    )
-  }
+  }, [sort])
 
   return (
     <section aria-label="Latest News Articles">
-      {!hideControls && (
-        <div className="flex flex-col gap-4 mb-6">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <h2 className="text-2xl font-bold tracking-tight">Latest News</h2>
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              <Select 
-                value={category}
-                onValueChange={setCategory}
-              >
-                <SelectTrigger className="w-[140px] dark:shadow-none dark:hover:shadow-primary/10">
-                  <SelectValue placeholder="Category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {NEWS_CATEGORIES.map(({ value, label }) => (
-                    <SelectItem key={value} value={value}>{label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select 
-                value={sortBy}
-                onValueChange={(value) => setSortBy(value as typeof sortBy)}
-              >
-                <SelectTrigger className="w-[140px] dark:shadow-none dark:hover:shadow-primary/10">
-                  <SelectValue placeholder="Sort by" />
-                </SelectTrigger>
-                <SelectContent>
-                  {SORT_OPTIONS.map(({ value, label }) => (
-                    <SelectItem key={value} value={value}>{label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <Search 
-            placeholder="Search news articles..."
-            onSearch={setSearchQuery}
-            initialValue={searchQuery}
-            className="w-full sm:max-w-md"
-          />
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold tracking-tight">Latest News</h2>
+        <div className="flex items-center gap-2">
+          <Select 
+            value={sort}
+            onValueChange={(value) => setSort(value as typeof sort)}
+          >
+            <SelectTrigger className="w-[140px] dark:shadow-none dark:hover:shadow-primary/10">
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="latest">Latest</SelectItem>
+              <SelectItem value="popular">Most Popular</SelectItem>
+              <SelectItem value="trending">Trending</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button variant="outline" size="icon" aria-label="Filter articles">
+            <Filter className="h-4 w-4" />
+          </Button>
         </div>
-      )}
-
-      {isLoading ? (
-        <div className="space-y-4">
-          {[...Array(3)].map((_, i) => (
-            <LoadingCard key={i} />
-          ))}
-        </div>
-      ) : (
-        <>
-          <div className="space-y-4">
-            {articles.map((article, i) => (
-              <Card key={i} className="overflow-hidden">
-                <CardContent className="p-0">
-                  <a 
-                    href={article.url} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="grid md:grid-cols-[2fr_1fr] gap-4 p-6 hover:bg-muted/5 dark:hover:bg-muted/10 transition-colors"
-                  >
-                    <div className="space-y-2">
-                      <h3 className="font-semibold leading-tight group-hover:text-primary transition-colors">
-                        {article.title}
-                      </h3>
-                      <p className="text-sm text-muted-foreground line-clamp-2">
+      </div>
+      <div className="space-y-6">
+        {loading
+          ? Array.from({ length: 3 }).map((_, i) => <LoadingCard key={i} />)
+          : articles.map((article) => (
+              <Card 
+                key={article.id}
+                className="overflow-hidden group hover:shadow-md dark:hover:shadow-primary/5 transition-all"
+              >
+                <CardContent className="p-6">
+                  <div className="flex flex-col md:flex-row gap-6">
+                    <div className="relative md:w-1/3 aspect-video md:aspect-square overflow-hidden rounded-lg">
+                      <PlaceholderImage
+                        src={article.image}
+                        alt={article.title}
+                        className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
+                        width={400}
+                        height={400}
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 dark:group-hover:bg-black/20 transition-colors duration-300" />
+                    </div>
+                    <div className="md:w-2/3 space-y-4">
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium text-primary">{article.category}</span>
+                          <time className="text-sm text-muted-foreground">{article.date}</time>
+                        </div>
+                        <h3 className="text-xl font-semibold group-hover:text-primary transition-colors">
+                          {article.title}
+                        </h3>
+                      </div>
+                      <p className="text-muted-foreground group-hover:text-muted-foreground/80 transition-colors">
                         {article.description}
                       </p>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <span>{article.source.name}</span>
-                        <span className="flex items-center">
-                          <Clock className="h-3.5 w-3.5 mr-1" />
-                          {formatDistanceToNow(new Date(article.publishedAt), { addSuffix: true })}
-                        </span>
-                      </div>
+                      <Button 
+                        className="shadow-sm hover:shadow-md dark:shadow-none dark:hover:shadow-primary/10 transition-all"
+                      >
+                        Read More
+                      </Button>
                     </div>
-                    {article.urlToImage && (
-                      <div className="md:order-last order-first relative aspect-video md:aspect-square overflow-hidden rounded-lg">
-                        <PlaceholderImage
-                          src={article.urlToImage}
-                          alt={article.title}
-                          width={300}
-                          height={300}
-                          className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
-                        />
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 dark:group-hover:bg-black/20 transition-colors duration-300" />
-                      </div>
-                    )}
-                  </a>
+                  </div>
                 </CardContent>
               </Card>
             ))}
-          </div>
-
-          <div className="flex justify-between items-center mt-6">
-            <Button
-              variant="outline"
-              onClick={() => setPage(page - 1)}
-              disabled={page === 1}
-              className="gap-2"
-            >
-              <ChevronLeft className="h-4 w-4" /> Previous
-            </Button>
-            <span className="text-sm text-muted-foreground">
-              Page {page} of {totalPages}
-            </span>
-            <Button
-              variant="outline"
-              onClick={() => setPage(page + 1)}
-              disabled={page === totalPages}
-              className="gap-2"
-            >
-              Next <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </>
-      )}
+      </div>
     </section>
   )
 }

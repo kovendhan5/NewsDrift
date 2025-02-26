@@ -4,15 +4,13 @@ import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Play, Heart, Share2, Clock } from "lucide-react"
+import { Play, Heart, Share2, Download, Clock } from "lucide-react"
+import { LoadingCard } from "@/components/loading-card"
+import Link from "next/link"
 import { ShareMenu } from "@/components/share-menu"
+import { fetchPodcasts, type Podcast } from "@/lib/utils"
 import { useAudioPlayerStore } from "@/lib/store"
 import { PlaceholderImage } from "@/components/ui/placeholder-image"
-import { fetchPodcasts, type Podcast } from "@/lib/podcast-api"
-import { PodcastGridSkeleton } from "@/components/ui/podcast-grid-skeleton"
-import { PodcastGridError } from "@/components/ui/podcast-grid-error"
-import { useSearchParams } from "next/navigation"
-import Link from "next/link"
 
 interface PodcastGridProps {
   type: "featured" | "trending" | "new" | "subscribed"
@@ -20,96 +18,54 @@ interface PodcastGridProps {
 
 export function PodcastGrid({ type }: PodcastGridProps) {
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [podcasts, setPodcasts] = useState<Podcast[]>([])
   const [favorites, setFavorites] = useState<string[]>([])
-  const { setCurrentEpisode } = useAudioPlayerStore()
-  const searchParams = useSearchParams()
-  const category = searchParams.get('category')
 
-  const loadPodcasts = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      const sort = type === 'trending' ? 'trending' 
-                : type === 'new' ? 'new'
-                : type === 'featured' ? 'popular'
-                : undefined;
-      
-      if (type !== 'subscribed') {
-        const data = await fetchPodcasts({ 
-          sort,
-          category: category === 'all' ? undefined : category || undefined
-        })
-        setPodcasts(data)
-      } else {
-        // Get subscribed podcasts from localStorage
-        const subscriptions = JSON.parse(localStorage.getItem('subscribedPodcasts') || '[]')
-        const subscribedPodcasts = []
-        for (const id of subscriptions) {
-          try {
-            const podcast = await fetchPodcasts({ id })
-            subscribedPodcasts.push(...podcast)
-          } catch (err) {
-            console.error(`Failed to load subscribed podcast ${id}:`, err)
-          }
-        }
-        setPodcasts(subscribedPodcasts)
-      }
-    } catch (err) {
-      console.error('Failed to load podcasts:', err)
-      setError('Failed to load podcasts. Please try again later.')
-    } finally {
-      setLoading(false)
-    }
-  }
+  const { setCurrentEpisode } = useAudioPlayerStore()
 
   useEffect(() => {
-    loadPodcasts()
-    
-    // Load favorite podcast IDs from localStorage
-    try {
-      const storedFavorites = localStorage.getItem('favoritePodcasts')
-      if (storedFavorites) {
-        setFavorites(JSON.parse(storedFavorites))
+    async function loadPodcasts() {
+      setLoading(true)
+      let sort: 'popular' | 'new' | 'trending' | undefined;
+      
+      // Map grid type to API sort parameter
+      if (type === 'trending') sort = 'trending';
+      else if (type === 'new') sort = 'new';
+      else if (type === 'featured') sort = 'popular';
+      
+      // For subscribed type, we'll need to implement user-specific logic later
+      if (type !== 'subscribed') {
+        const data = await fetchPodcasts({ sort })
+        setPodcasts(data)
+      } else {
+        // TODO: Implement subscribed podcasts fetching
+        setPodcasts([])
       }
-    } catch (err) {
-      console.error('Could not load favorites from localStorage:', err)
+      setLoading(false)
     }
-  }, [type, category])
 
-  const toggleFavorite = (podcastId: string) => {
-    const newFavorites = favorites.includes(podcastId)
-      ? favorites.filter(id => id !== podcastId)
-      : [...favorites, podcastId]
-    
-    setFavorites(newFavorites)
-    
-    // Save to localStorage
-    try {
-      localStorage.setItem('favoritePodcasts', JSON.stringify(newFavorites))
-    } catch (err) {
-      console.error('Could not save favorites to localStorage:', err)
-    }
+    loadPodcasts()
+  }, [type])
+
+  const toggleFavorite = (id: string) => {
+    setFavorites((prev) => (prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]))
   }
 
   if (loading) {
-    return <PodcastGridSkeleton />
-  }
-
-  if (error) {
-    return <PodcastGridError message={error} onRetry={loadPodcasts} />
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <LoadingCard key={i} />
+        ))}
+      </div>
+    )
   }
 
   if (podcasts.length === 0) {
     return (
       <div className="text-center py-12">
         <h3 className="text-lg font-medium">No podcasts found</h3>
-        <p className="text-muted-foreground mt-2">
-          {type === 'subscribed' 
-            ? "You haven't subscribed to any podcasts yet"
-            : "Try a different category or check back later"}
-        </p>
+        <p className="text-muted-foreground mt-2">Try a different category or check back later</p>
       </div>
     )
   }
@@ -121,81 +77,59 @@ export function PodcastGrid({ type }: PodcastGridProps) {
           <CardContent className="p-0">
             <div className="relative">
               <Link href={`/podcasts/${podcast.id}`}>
-                <div className="relative aspect-square overflow-hidden">
-                  <PlaceholderImage
-                    src={podcast.image}
-                    alt={podcast.title}
-                    width={300}
-                    height={300}
-                    className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 dark:group-hover:bg-black/20 transition-colors duration-300" />
-                </div>
+                <PlaceholderImage
+                  src={podcast.image}
+                  alt={podcast.title}
+                  width={300}
+                  height={300}
+                  className="w-full aspect-square object-cover transition-transform group-hover:scale-105"
+                />
               </Link>
-              <Badge className="absolute top-2 right-2 bg-black/70 hover:bg-black/80">
-                {podcast.category}
-              </Badge>
+              <Badge className="absolute top-2 right-2 bg-primary/90 hover:bg-primary dark:bg-primary/80 dark:hover:bg-primary/90">{podcast.category}</Badge>
             </div>
-            <div className="p-4 space-y-3">
-              <Link href={`/podcasts/${podcast.id}`}>
-                <h3 className="font-semibold line-clamp-1 group-hover:text-primary transition-colors">
-                  {podcast.title}
-                </h3>
+            <div className="p-4">
+              <Link href={`/podcasts/${podcast.id}`} className="hover:underline">
+                <h3 className="font-semibold text-lg line-clamp-1">{podcast.title}</h3>
               </Link>
-              <p className="text-sm text-muted-foreground line-clamp-1">{podcast.author}</p>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center text-sm text-muted-foreground">
-                  <Clock className="mr-1 h-4 w-4" />
-                  <span>{podcast.duration}</span>
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  {podcast.episodes} episodes
-                </div>
+              <p className="text-sm text-muted-foreground mb-2">{podcast.author}</p>
+              <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
+                <span>{podcast.episodes} episodes</span>
+                <span className="flex items-center">
+                  <Clock className="h-3 w-3 mr-1" />
+                  {podcast.duration}
+                </span>
               </div>
-              <div className="flex gap-2">
-                <Button
-                  variant="secondary"
-                  className="flex-1 shadow-sm hover:shadow-md dark:shadow-none dark:hover:shadow-primary/10 transition-all"
-                  onClick={() => {
-                    // Use the first episode if available, or create a placeholder
-                    const episode = podcast.episodesList?.[0] || {
-                      id: `${podcast.id}-latest`,
-                      title: `Latest Episode of ${podcast.title}`,
-                      audioUrl: `https://example.com/podcasts/${podcast.id}/latest.mp3`
-                    }
-                    
-                    setCurrentEpisode({
-                      isVisible: true,
-                      currentEpisode: {
-                        id: episode.id,
-                        title: episode.title,
-                        author: podcast.author,
-                        image: podcast.image,
-                        url: episode.audioUrl,
-                      }
-                    })
-                  }}
+              <div className="flex items-center gap-2">
+                <Button 
+                  size="sm" 
+                  className="flex-1"
+                  onClick={() => setCurrentEpisode({
+                    title: podcast.title,
+                    source: podcast.author,
+                    image: podcast.image,
+                    audio: `https://example.com/podcasts/${podcast.id}.mp3`, // This would be a real URL in production
+                  })}
                 >
-                  <Play className="mr-2 h-4 w-4" />
+                  <Play className="h-4 w-4 mr-1" />
                   Play
                 </Button>
                 <Button
-                  variant="outline"
                   size="icon"
-                  className="transition-all hover:text-red-500 hover:border-red-500"
+                  variant="outline"
+                  className="h-8 w-8"
                   onClick={() => toggleFavorite(podcast.id)}
+                  aria-label={favorites.includes(podcast.id) ? "Remove from favorites" : "Add to favorites"}
                 >
-                  <Heart 
-                    className={`h-4 w-4 ${favorites.includes(podcast.id) ? 'fill-red-500 text-red-500' : ''}`} 
-                  />
+                  <Heart className={`h-4 w-4 ${favorites.includes(podcast.id) ? "fill-red-500 text-red-500" : ""}`} />
                 </Button>
-                <ShareMenu
-                  url={`/podcasts/${podcast.id}`}
-                  title={podcast.title}
-                  triggerClassName="border"
-                >
-                  <Share2 className="h-4 w-4" />
+                <ShareMenu url={`/podcasts/${podcast.id}`} title={podcast.title}>
+                  <Button size="icon" variant="outline" className="h-8 w-8" aria-label="Share podcast">
+                    <Share2 className="h-4 w-4" />
+                  </Button>
                 </ShareMenu>
+                <Button size="icon" variant="outline" className="h-8 w-8" aria-label="Download podcast">
+                  <Download className="h-4 w-4" />
+                </Button>
               </div>
             </div>
           </CardContent>

@@ -39,27 +39,47 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.newsdrift.c
 
 // Replace categoryImageMap with direct Unsplash URLs
 const categoryImageMap = {
-  Technology: "https://images.unsplash.com/photo-1518770660439-4636190af475",
-  Environment: "https://images.unsplash.com/photo-1472214103451-9374bd1c798e",
-  Business: "https://images.unsplash.com/photo-1460925895917-afdab827c52f",
-  News: "https://images.unsplash.com/photo-1504711434969-e33886168f5c",
-  Science: "https://images.unsplash.com/photo-1532094349884-543bc11b234d",
-  Health: "https://images.unsplash.com/photo-1505751172876-fa1923c5c528",
-  Politics: "https://images.unsplash.com/photo-1529107386315-e1a2ed48a620",
-  Entertainment: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819",
-  Sports: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211",
-  Culture: "https://images.unsplash.com/photo-1482245294234-b3f2f8d5f1a4",
-  Food: "https://images.unsplash.com/photo-1504674900247-0877df9cc836",
-  Travel: "https://images.unsplash.com/photo-1488646953014-85cb44e25828",
-  History: "https://images.unsplash.com/photo-1461360370896-922624d12aa1",
-  Wellness: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b",
-  Finance: "https://images.unsplash.com/photo-1518186285589-2f7649de83e0",
+  technology: "https://images.unsplash.com/photo-1518770660439-4636190af475",
+  environment: "https://images.unsplash.com/photo-1472214103451-9374bd1c798e",
+  business: "https://images.unsplash.com/photo-1460925895917-afdab827c52f",
+  news: "https://images.unsplash.com/photo-1504711434969-e33886168f5c",
+  science: "https://images.unsplash.com/photo-1532094349884-543bc11b234d",
+  health: "https://images.unsplash.com/photo-1505751172876-fa1923c5c528",
+  politics: "https://images.unsplash.com/photo-1529107386315-e1a2ed48a620",
+  entertainment: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819",
+  sports: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211",
+  culture: "https://images.unsplash.com/photo-1482245294234-b3f2f8d5f1a4",
+  food: "https://images.unsplash.com/photo-1504674900247-0877df9cc836",
+  travel: "https://images.unsplash.com/photo-1488646953014-85cb44e25828",
+  history: "https://images.unsplash.com/photo-1461360370896-922624d12aa1",
+  wellness: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b",
+  finance: "https://images.unsplash.com/photo-1518186285589-2f7649de83e0",
+  music: "/images/categories/music.jpg",
+  movies: "/images/categories/movies.jpg",
+  gaming: "/images/categories/gaming.jpg",
   default: "https://images.unsplash.com/photo-1557683311-eac922347aa1"
 };
 
-function getCategoryImage(category: string, width: number, height: number): string {
-  const baseUrl = categoryImageMap[category as keyof typeof categoryImageMap] || categoryImageMap.default;
-  return `${baseUrl}?w=${width}&h=${height}&fit=crop&q=80`;
+/**
+ * Get an image for a given category
+ * @param category The category to get an image for
+ * @param width Optional width for remote images
+ * @param height Optional height for remote images
+ * @returns The URL of the category image
+ */
+export function getCategoryImage(category: string, width?: number, height?: number): string {
+  const normalizedCategory = category.toLowerCase();
+  const baseUrl = categoryImageMap[normalizedCategory as keyof typeof categoryImageMap] || categoryImageMap.default;
+  
+  // For local images (those starting with '/')
+  if (baseUrl.startsWith('/')) {
+    return baseUrl;
+  }
+  
+  // For remote images (Unsplash URLs)
+  return width && height
+    ? `${baseUrl}?w=${width}&h=${height}&fit=crop&q=80`
+    : baseUrl;
 }
 
 // API Utility Functions
@@ -167,47 +187,6 @@ export async function fetchPodcasts(options: {
   } catch (error) {
     console.error('Error fetching podcasts:', error);
     return [];
-  }
-}
-
-export async function downloadPodcastEpisode(url: string, title: string) {
-  try {
-    // Sanitize filename
-    const filename = title
-      .replace(/[^a-z0-9]/gi, '_')
-      .toLowerCase() + '.' + url.split('.').pop()
-
-    const response = await fetch(url)
-    if (!response.ok) throw new Error('Network response was not ok')
-
-    const blob = await response.blob()
-    const downloadUrl = window.URL.createObjectURL(blob)
-    
-    const a = document.createElement('a')
-    a.href = downloadUrl
-    a.download = filename
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    window.URL.revokeObjectURL(downloadUrl)
-  } catch (error) {
-    console.error('Download failed:', error)
-    throw error
-  }
-}
-
-export function validateAudioUrl(url: string): { isValid: boolean; format?: string } {
-  try {
-    const extension = url.split('.').pop()?.toLowerCase()
-    const supportedFormats = ['mp3', 'wav', 'aac', 'm4a', 'ogg']
-    
-    if (!extension || !supportedFormats.includes(extension)) {
-      return { isValid: false }
-    }
-    
-    return { isValid: true, format: extension }
-  } catch {
-    return { isValid: false }
   }
 }
 

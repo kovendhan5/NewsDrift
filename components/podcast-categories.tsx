@@ -1,85 +1,78 @@
 "use client"
 
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import {
-  Radio,
-  Music,
+  Headphones,
+  Mic,
   Newspaper,
-  HeartPulse,
   Briefcase,
-  GraduationCap,
-  Gamepad2,
-  Film,
+  HeartPulse,
+  Laugh,
+  Music,
   Globe,
-  Waypoints,
-  Book,
+  BookOpen,
   Lightbulb,
-  History,
-  HandHeart,
-  PenLine
 } from "lucide-react"
-import { useRouter, useSearchParams } from "next/navigation"
-import { useState, useCallback } from "react"
 
 const categories = [
-  { id: "all", name: "All", icon: Radio },
-  { id: "music", name: "Music", icon: Music },
+  { id: "all", name: "All", icon: Headphones },
   { id: "news", name: "News", icon: Newspaper },
-  { id: "health", name: "Health", icon: HeartPulse },
   { id: "business", name: "Business", icon: Briefcase },
-  { id: "education", name: "Education", icon: GraduationCap },
-  { id: "gaming", name: "Gaming", icon: Gamepad2 },
-  { id: "entertainment", name: "Entertainment", icon: Film },
+  { id: "technology", name: "Technology", icon: Mic },
+  { id: "health", name: "Health", icon: HeartPulse },
+  { id: "comedy", name: "Comedy", icon: Laugh },
+  { id: "music", name: "Music", icon: Music },
   { id: "international", name: "International", icon: Globe },
-  { id: "lifestyle", name: "Lifestyle", icon: Waypoints },
-  { id: "literature", name: "Literature", icon: Book },
+  { id: "education", name: "Education", icon: BookOpen },
   { id: "science", name: "Science", icon: Lightbulb },
-  { id: "history", name: "History", icon: History },
-  { id: "society", name: "Society", icon: HandHeart },
-  { id: "arts", name: "Arts", icon: PenLine },
 ]
 
 export function PodcastCategories() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const [activeCategory, setActiveCategory] = useState(
-    searchParams.get("category") || "all"
-  )
-
-  const handleCategoryClick = useCallback((categoryId: string) => {
-    setActiveCategory(categoryId)
-    const params = new URLSearchParams(searchParams)
-    if (categoryId === "all") {
-      params.delete("category")
-    } else {
-      params.set("category", categoryId)
-    }
-    router.push(`?${params.toString()}`)
-  }, [router, searchParams])
+  const [activeCategory, setActiveCategory] = useState("all")
 
   return (
-    <Card>
-      <CardContent className="p-4">
-        <ScrollArea className="w-full whitespace-nowrap">
-          <div className="flex space-x-2">
-            {categories.map(({ id, name, icon: Icon }) => (
+    <div className="relative">
+      <ScrollArea className="w-full whitespace-nowrap rounded-lg border dark:border-muted/20">
+        <div className="flex w-max space-x-2 p-2">
+          {categories.map((category) => {
+            const Icon = category.icon
+            const isActive = activeCategory === category.id
+            return (
               <Button
-                key={id}
-                variant={activeCategory === id ? "secondary" : "ghost"}
-                className="flex items-center gap-2 transition-all"
-                onClick={() => handleCategoryClick(id)}
+                key={category.id}
+                variant={isActive ? "default" : "outline"}
+                className={`
+                  flex items-center gap-2 transition-all duration-200
+                  ${isActive 
+                    ? "dark:bg-primary/20 dark:hover:bg-primary/30 shadow-sm dark:shadow-primary/10" 
+                    : "dark:hover:bg-primary/10 dark:border-muted/30"}
+                `}
+                onClick={() => setActiveCategory(category.id)}
               >
-                <Icon className="h-4 w-4" />
-                {name}
+                <Icon className={`
+                  h-4 w-4 transition-colors duration-200
+                  ${isActive 
+                    ? "text-primary-foreground dark:text-primary" 
+                    : "text-muted-foreground group-hover:text-primary"}
+                `} />
+                <span className={`
+                  transition-colors duration-200
+                  ${isActive ? "font-medium" : ""}
+                `}>
+                  {category.name}
+                </span>
               </Button>
-            ))}
-          </div>
-          <ScrollBar orientation="horizontal" className="invisible" />
-        </ScrollArea>
-      </CardContent>
-    </Card>
+            )
+          })}
+        </div>
+        <ScrollBar 
+          orientation="horizontal" 
+          className="dark:bg-muted/20 dark:hover:bg-muted/30 transition-colors"
+        />
+      </ScrollArea>
+    </div>
   )
 }
 

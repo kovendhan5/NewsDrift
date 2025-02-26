@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
-import { Play, Pause, SkipBack, SkipForward, Volume2, Minimize2, Maximize2, X, AlertCircle } from "lucide-react"
+import { Play, Pause, SkipBack, SkipForward, Volume2, Minimize2, Maximize2, X } from "lucide-react"
 import { formatTime } from "@/lib/utils"
 import { useAudioPlayerStore } from "@/lib/store"
 import { PlaceholderImage } from "@/components/ui/placeholder-image"
@@ -15,7 +15,6 @@ export function AudioPlayer() {
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
   const [isMinimized, setIsMinimized] = useState(false)
-  const [error, setError] = useState<string | null>(null)
   const audioRef = useRef<HTMLAudioElement | null>(null)
 
   useEffect(() => {
@@ -27,23 +26,10 @@ export function AudioPlayer() {
     audio.addEventListener("timeupdate", updateProgress)
     audio.addEventListener("loadedmetadata", () => {
       setDuration(audio.duration)
-      setError(null)
     })
     audio.addEventListener("ended", () => {
       setIsPlaying(false)
       setCurrentTime(0)
-    })
-    audio.addEventListener("error", (e) => {
-      console.error('Audio playback error:', e)
-      setError('Failed to load or play audio. Please try again.')
-      setIsPlaying(false)
-    })
-    audio.addEventListener("stalled", () => {
-      console.warn('Audio playback stalled')
-      setError('Audio playback stalled. Please wait or try again.')
-    })
-    audio.addEventListener("waiting", () => {
-      console.log('Audio buffering...')
     })
 
     // Clean up
@@ -51,42 +37,17 @@ export function AudioPlayer() {
       audio.removeEventListener("timeupdate", updateProgress)
       audio.removeEventListener("loadedmetadata", () => {})
       audio.removeEventListener("ended", () => {})
-      audio.removeEventListener("error", () => {})
-      audio.removeEventListener("stalled", () => {})
-      audio.removeEventListener("waiting", () => {})
       audio.pause()
     }
   }, [])
 
   // Update audio source when currentEpisode changes
   useEffect(() => {
-    if (audioRef.current && currentEpisode?.url) {
-      setError(null)
-      const audio = audioRef.current
-      audio.src = currentEpisode.url
-      
-      // Set audio format if available
-      const canPlayType = (format: string) => {
-        const mimeTypes = {
-          mp3: 'audio/mpeg',
-          wav: 'audio/wav',
-          aac: 'audio/aac',
-          m4a: 'audio/mp4',
-          ogg: 'audio/ogg',
-        }
-        return audio.canPlayType(mimeTypes[format as keyof typeof mimeTypes])
-      }
-
-      // Get the file extension from the URL
-      const extension = currentEpisode.url.split('.').pop()?.toLowerCase()
-      if (extension && !canPlayType(extension)) {
-        setError(`This browser doesn't support ${extension.toUpperCase()} audio format`)
-        return
-      }
-
-      audio.load()
-      setIsPlaying(false)
-      setCurrentTime(0)
+    if (audioRef.current && currentEpisode?.audio) {
+      audioRef.current.src = currentEpisode.audio;
+      audioRef.current.load();
+      setIsPlaying(false);
+      setCurrentTime(0);
     }
   }, [currentEpisode])
 
@@ -104,22 +65,10 @@ export function AudioPlayer() {
 
   const togglePlayPause = () => {
     if (audioRef.current) {
-      if (error) {
-        // Try reloading on error
-        setError(null)
-        audioRef.current.load()
-      }
-      
       if (isPlaying) {
         audioRef.current.pause()
       } else {
-        const playPromise = audioRef.current.play()
-        if (playPromise !== undefined) {
-          playPromise.catch(error => {
-            console.error('Playback error:', error)
-            setError('Failed to start playback. Please try again.')
-          })
-        }
+        audioRef.current.play()
       }
       setIsPlaying(!isPlaying)
     }
@@ -146,10 +95,10 @@ export function AudioPlayer() {
 
   const handleClose = () => {
     if (audioRef.current) {
-      audioRef.current.pause()
-      setIsPlaying(false)
+      audioRef.current.pause();
+      setIsPlaying(false);
     }
-    setIsVisible(false)
+    setIsVisible(false);
   }
 
   if (!currentEpisode || !isVisible) return null
@@ -157,137 +106,98 @@ export function AudioPlayer() {
   return (
     <div
       className={`fixed bottom-0 left-0 right-0 border-t bg-background/95 dark:bg-background/90 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 dark:supports-[backdrop-filter]:bg-background/50 transition-all duration-300 shadow-lg dark:shadow-primary/5 ${
-        isMinimized ? 'h-16' : 'h-24'
+        isMinimized ? "h-14" : "h-20"
       }`}
     >
-      <div className="container flex h-full items-center gap-4 px-4">
-        <div className={`flex items-center gap-4 ${isMinimized ? 'flex-1' : 'w-1/3'}`}>
-          {currentEpisode.image && (
-            <div className="relative aspect-square h-12 w-12 overflow-hidden rounded-lg">
-              <PlaceholderImage
-                src={currentEpisode.image}
-                alt={currentEpisode.title}
-                width={48}
-                height={48}
-                className="object-cover"
-              />
-            </div>
-          )}
-          <div className="min-w-0 flex-1">
-            <div className="truncate font-medium">{currentEpisode.title}</div>
-            {!isMinimized && currentEpisode.author && (
-              <div className="truncate text-sm text-muted-foreground">{currentEpisode.author}</div>
-            )}
+      <div className="container flex h-full items-center justify-between px-4">
+        <div className="flex items-center gap-4">
+          <div className="relative overflow-hidden rounded-lg">
+            <PlaceholderImage
+              alt={`Cover for ${currentEpisode.title}`}
+              className="h-10 w-10 object-cover transition-transform duration-300 hover:scale-105"
+              src={currentEpisode.image}
+              width={48}
+              height={48}
+            />
+            <div className="absolute inset-0 bg-black/0 hover:bg-black/5 dark:hover:bg-black/20 transition-colors duration-300" />
+          </div>
+          <div className={`transition-opacity duration-300 ${isMinimized ? "hidden sm:block" : ""}`}>
+            <h3 className="font-semibold line-clamp-1 hover:text-primary transition-colors">{currentEpisode.title}</h3>
+            <p className="text-sm text-muted-foreground hover:text-muted-foreground/80 transition-colors">{currentEpisode.source}</p>
           </div>
         </div>
-
-        {!isMinimized && (
-          <div className="flex w-1/3 flex-col items-center gap-2">
-            {error ? (
-              <div className="flex items-center gap-2 text-sm text-red-500">
-                <AlertCircle className="h-4 w-4" />
-                <span>{error}</span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setError(null)
-                    if (audioRef.current) {
-                      audioRef.current.load()
-                    }
-                  }}
-                >
-                  Try Again
-                </Button>
-              </div>
-            ) : (
-              <>
-                <div className="flex items-center gap-4">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={handleSkipBack}
-                    aria-label="Skip back 15 seconds"
-                  >
-                    <SkipBack className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-10 w-10"
-                    onClick={togglePlayPause}
-                    aria-label={isPlaying ? "Pause" : "Play"}
-                  >
-                    {isPlaying ? (
-                      <Pause className="h-5 w-5" />
-                    ) : (
-                      <Play className="h-5 w-5" />
-                    )}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={handleSkipForward}
-                    aria-label="Skip forward 15 seconds"
-                  >
-                    <SkipForward className="h-4 w-4" />
-                  </Button>
-                </div>
-                <div className="flex w-full items-center gap-2 text-sm">
-                  <span className="tabular-nums">{formatTime(currentTime)}</span>
-                  <Slider
-                    value={[currentTime]}
-                    min={0}
-                    max={duration}
-                    step={1}
-                    onValueChange={handleSeek}
-                    className="flex-1"
-                    aria-label="Playback progress"
-                  />
-                  <span className="tabular-nums">{formatTime(duration)}</span>
-                </div>
-              </>
-            )}
+        <div className={`flex flex-col items-center gap-2 max-w-xl w-full px-4 ${isMinimized ? "hidden sm:flex" : ""}`}>
+          <div className="flex items-center gap-4">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={handleSkipBack} 
+              aria-label="Skip backward 15 seconds"
+              className="hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors"
+            >
+              <SkipBack className="h-5 w-5" />
+            </Button>
+            <Button 
+              variant="secondary" 
+              size="icon" 
+              onClick={togglePlayPause} 
+              aria-label={isPlaying ? "Pause" : "Play"}
+              className="shadow-sm hover:shadow-md dark:shadow-none dark:hover:shadow-primary/10 transition-all hover:scale-105"
+            >
+              {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={handleSkipForward} 
+              aria-label="Skip forward 15 seconds"
+              className="hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors"
+            >
+              <SkipForward className="h-5 w-5" />
+            </Button>
           </div>
-        )}
-
-        <div className={`flex items-center gap-4 ${isMinimized ? '' : 'w-1/3 justify-end'}`}>
-          {!isMinimized && (
-            <div className="flex w-32 items-center gap-2">
-              <Volume2 className="h-4 w-4" />
-              <Slider
-                value={volume}
-                min={0}
-                max={100}
-                step={1}
-                onValueChange={setVolume}
-                aria-label="Volume"
-              />
-            </div>
-          )}
+          <div className="flex items-center gap-2 w-full">
+            <span className="text-sm text-muted-foreground">{formatTime(currentTime)}</span>
+            <Slider
+              value={[currentTime]}
+              max={duration || 100}
+              step={1}
+              className="w-full hover:cursor-pointer"
+              onValueChange={handleSeek}
+              aria-label="Seek audio position"
+            />
+            <span className="text-sm text-muted-foreground">{formatTime(duration)}</span>
+          </div>
+        </div>
+        <div className="flex items-center gap-4">
+          <div className={`flex items-center gap-2 ${isMinimized ? "hidden sm:flex" : ""}`}>
+            <Volume2 className="h-5 w-5 text-muted-foreground" />
+            <Slider
+              value={volume}
+              onValueChange={setVolume}
+              max={100}
+              step={1}
+              className="w-24 hover:cursor-pointer"
+              aria-label="Adjust volume"
+            />
+          </div>
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8"
             onClick={() => setIsMinimized(!isMinimized)}
             aria-label={isMinimized ? "Maximize player" : "Minimize player"}
+            className="hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors"
           >
-            {isMinimized ? (
-              <Maximize2 className="h-4 w-4" />
-            ) : (
-              <Minimize2 className="h-4 w-4" />
-            )}
+            {isMinimized ? <Maximize2 className="h-5 w-5" /> : <Minimize2 className="h-5 w-5" />}
           </Button>
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8"
             onClick={handleClose}
+            className="text-muted-foreground hover:text-foreground hover:bg-destructive/10 dark:hover:bg-destructive/20 transition-colors"
             aria-label="Close player"
           >
-            <X className="h-4 w-4" />
+            <X className="h-5 w-5" />
           </Button>
         </div>
       </div>

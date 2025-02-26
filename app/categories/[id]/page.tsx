@@ -5,6 +5,19 @@ import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
 
+// Add generateStaticParams to handle static export
+export function generateStaticParams() {
+  // Return all possible category IDs from your data
+  return [
+    { id: 'world' },
+    { id: 'politics' },
+    { id: 'business' },
+    { id: 'technology' },
+    { id: 'science' },
+    { id: 'health' }
+  ]
+}
+
 export default function CategoryDetailPage({ params }: { params: { id: string } }) {
   return (
     <div className="min-h-screen bg-background">
