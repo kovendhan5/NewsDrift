@@ -1,18 +1,18 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import Link from "next/link"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Play, Heart, Share2, Download, Clock, PlayCircle } from "lucide-react"
+import { Play, Heart, Share2, Clock } from "lucide-react"
 import { ShareMenu } from "@/components/share-menu"
 import { useAudioPlayerStore } from "@/lib/store"
 import { PlaceholderImage } from "@/components/ui/placeholder-image"
 import { fetchPodcasts, type Podcast } from "@/lib/podcast-api"
 import { PodcastGridSkeleton } from "@/components/ui/podcast-grid-skeleton"
 import { PodcastGridError } from "@/components/ui/podcast-grid-error"
-import { downloadPodcastEpisode } from "@/lib/utils"
+import { useSearchParams } from "next/navigation"
+import Link from "next/link"
 
 interface PodcastGridProps {
   type: "featured" | "trending" | "new" | "subscribed"
@@ -24,6 +24,8 @@ export function PodcastGrid({ type }: PodcastGridProps) {
   const [podcasts, setPodcasts] = useState<Podcast[]>([])
   const [favorites, setFavorites] = useState<string[]>([])
   const { setCurrentEpisode } = useAudioPlayerStore()
+  const searchParams = useSearchParams()
+  const category = searchParams.get('category')
 
   const loadPodcasts = async () => {
     try {
@@ -35,11 +37,24 @@ export function PodcastGrid({ type }: PodcastGridProps) {
                 : undefined;
       
       if (type !== 'subscribed') {
-        const data = await fetchPodcasts({ sort })
+        const data = await fetchPodcasts({ 
+          sort,
+          category: category === 'all' ? undefined : category || undefined
+        })
         setPodcasts(data)
       } else {
-        // When we have real users, we would fetch their subscribed podcasts here
-        setPodcasts([])
+        // Get subscribed podcasts from localStorage
+        const subscriptions = JSON.parse(localStorage.getItem('subscribedPodcasts') || '[]')
+        const subscribedPodcasts = []
+        for (const id of subscriptions) {
+          try {
+            const podcast = await fetchPodcasts({ id })
+            subscribedPodcasts.push(...podcast)
+          } catch (err) {
+            console.error(`Failed to load subscribed podcast ${id}:`, err)
+          }
+        }
+        setPodcasts(subscribedPodcasts)
       }
     } catch (err) {
       console.error('Failed to load podcasts:', err)
@@ -61,7 +76,7 @@ export function PodcastGrid({ type }: PodcastGridProps) {
     } catch (err) {
       console.error('Could not load favorites from localStorage:', err)
     }
-  }, [type])
+  }, [type, category])
 
   const toggleFavorite = (podcastId: string) => {
     const newFavorites = favorites.includes(podcastId)
@@ -88,7 +103,7 @@ export function PodcastGrid({ type }: PodcastGridProps) {
 
   if (podcasts.length === 0) {
     return (
-      <div className="text-center py-12 bg-muted/5 rounded-lg">
+      <div className="text-center py-12">
         <h3 className="text-lg font-medium">No podcasts found</h3>
         <p className="text-muted-foreground mt-2">
           {type === 'subscribed' 

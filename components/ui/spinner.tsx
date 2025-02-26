@@ -1,16 +1,19 @@
 "use client"
 
+import { Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-export function Spinner({ className }: { className?: string }) {
+interface SpinnerProps extends React.HTMLAttributes<HTMLDivElement> {}
+
+export function Spinner({ className, ...props }: SpinnerProps) {
   return (
     <div
-      className={cn(
-        "inline-block h-4 w-4 animate-spin rounded-full border-2 border-solid border-current border-r-transparent motion-reduce:animate-[spin_1.5s_linear_infinite]",
-        className
-      )}
       role="status"
+      aria-label="Loading"
+      className={cn("animate-spin", className)}
+      {...props}
     >
+      <Loader2 className="h-4 w-4" />
       <span className="sr-only">Loading...</span>
     </div>
   )

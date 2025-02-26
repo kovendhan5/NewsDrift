@@ -1,76 +1,83 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { Clock, RefreshCw, ChevronLeft, ChevronRight } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { LoadingCard } from "@/components/loading-card"
-import { fetchNews, type Article } from "@/lib/news-api"
+import { useNewsStore } from "@/lib/store"
+import { fetchNews } from "@/lib/news-api"
 import { PlaceholderImage } from "@/components/ui/placeholder-image"
+import { Search } from "@/components/search"
 
-const CATEGORIES = [
+const NEWS_CATEGORIES = [
   { value: "general", label: "General" },
-  { value: "business", label: "Business" },
   { value: "technology", label: "Technology" },
+  { value: "business", label: "Business" },
   { value: "entertainment", label: "Entertainment" },
   { value: "health", label: "Health" },
   { value: "science", label: "Science" },
   { value: "sports", label: "Sports" }
-] as const
+] as const;
 
 const SORT_OPTIONS = [
   { value: "publishedAt", label: "Latest" },
   { value: "popularity", label: "Most Popular" },
   { value: "relevancy", label: "Most Relevant" }
-] as const
+] as const;
 
-type Category = typeof CATEGORIES[number]["value"]
-type SortOption = typeof SORT_OPTIONS[number]["value"]
+interface NewsFeedProps {
+  hideControls?: boolean;
+}
 
-export function NewsFeed() {
-  const [loading, setLoading] = useState(true)
-  const [articles, setArticles] = useState<Article[]>([])
-  const [category, setCategory] = useState<Category>("general")
-  const [sortBy, setSortBy] = useState<SortOption>("publishedAt")
-  const [error, setError] = useState<string | null>(null)
-  const [page, setPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
-  const pageSize = 10
+export function NewsFeed({ hideControls = false }: NewsFeedProps) {
+  const {
+    articles,
+    category,
+    sortBy,
+    page,
+    pageSize,
+    totalResults,
+    isLoading,
+    error,
+    searchQuery,
+    setCategory,
+    setSortBy,
+    setPage,
+    setArticles,
+    setLoading,
+    setError,
+    setSearchQuery
+  } = useNewsStore()
 
   useEffect(() => {
     async function loadArticles() {
       try {
         setLoading(true)
         setError(null)
-        const data = await fetchNews({ 
+        const data = await fetchNews({
           category,
           sortBy,
           page,
           pageSize,
-          language: 'en'
+          language: 'en',
+          q: searchQuery
         })
-        setArticles(data.articles)
-        setTotalPages(Math.ceil(data.totalResults / pageSize))
+        setArticles(data)
       } catch (err) {
         console.error('Failed to fetch articles:', err)
-        setError('Failed to load articles. Please try again later.')
+        setError(err instanceof Error ? err.message : 'Failed to load articles')
       } finally {
         setLoading(false)
       }
     }
 
     loadArticles()
-  }, [category, sortBy, page])
+  }, [category, sortBy, page, searchQuery])
 
-  const handlePreviousPage = () => {
-    setPage((p) => Math.max(1, p - 1))
-  }
-
-  const handleNextPage = () => {
-    setPage((p) => Math.min(totalPages, p + 1))
-  }
+  const totalPages = Math.ceil(totalResults / pageSize)
 
   if (error) {
     return (
@@ -90,45 +97,49 @@ export function NewsFeed() {
 
   return (
     <section aria-label="Latest News Articles">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-        <h2 className="text-2xl font-bold tracking-tight">Latest News</h2>
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          <Select 
-            value={category}
-            onValueChange={(value) => {
-              setPage(1)
-              setCategory(value as Category)
-            }}
-          >
-            <SelectTrigger className="w-[140px] dark:shadow-none dark:hover:shadow-primary/10">
-              <SelectValue placeholder="Category" />
-            </SelectTrigger>
-            <SelectContent>
-              {CATEGORIES.map(({ value, label }) => (
-                <SelectItem key={value} value={value}>{label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select 
-            value={sortBy}
-            onValueChange={(value) => {
-              setPage(1)
-              setSortBy(value as SortOption)
-            }}
-          >
-            <SelectTrigger className="w-[140px] dark:shadow-none dark:hover:shadow-primary/10">
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent>
-              {SORT_OPTIONS.map(({ value, label }) => (
-                <SelectItem key={value} value={value}>{label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+      {!hideControls && (
+        <div className="flex flex-col gap-4 mb-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <h2 className="text-2xl font-bold tracking-tight">Latest News</h2>
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <Select 
+                value={category}
+                onValueChange={setCategory}
+              >
+                <SelectTrigger className="w-[140px] dark:shadow-none dark:hover:shadow-primary/10">
+                  <SelectValue placeholder="Category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {NEWS_CATEGORIES.map(({ value, label }) => (
+                    <SelectItem key={value} value={value}>{label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select 
+                value={sortBy}
+                onValueChange={(value) => setSortBy(value as typeof sortBy)}
+              >
+                <SelectTrigger className="w-[140px] dark:shadow-none dark:hover:shadow-primary/10">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                  {SORT_OPTIONS.map(({ value, label }) => (
+                    <SelectItem key={value} value={value}>{label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <Search 
+            placeholder="Search news articles..."
+            onSearch={setSearchQuery}
+            initialValue={searchQuery}
+            className="w-full sm:max-w-md"
+          />
         </div>
-      </div>
+      )}
 
-      {loading ? (
+      {isLoading ? (
         <div className="space-y-4">
           {[...Array(3)].map((_, i) => (
             <LoadingCard key={i} />
@@ -182,7 +193,7 @@ export function NewsFeed() {
           <div className="flex justify-between items-center mt-6">
             <Button
               variant="outline"
-              onClick={handlePreviousPage}
+              onClick={() => setPage(page - 1)}
               disabled={page === 1}
               className="gap-2"
             >
@@ -193,7 +204,7 @@ export function NewsFeed() {
             </span>
             <Button
               variant="outline"
-              onClick={handleNextPage}
+              onClick={() => setPage(page + 1)}
               disabled={page === totalPages}
               className="gap-2"
             >

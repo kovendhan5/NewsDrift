@@ -1,3 +1,8 @@
+"use client"
+
+import { useEffect } from "react"
+import { useNewsStore } from "@/lib/store"
+import { NewsFeed } from "@/components/news-feed"
 import { Header } from "@/components/header"
 import { CategoryContent } from "@/components/category-content"
 import { AudioPlayer } from "@/components/audio-player"
@@ -5,7 +10,19 @@ import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
 
-export default function CategoryDetailPage({ params }: { params: { id: string } }) {
+interface CategoryPageProps {
+  params: {
+    category: string
+  }
+}
+
+export default function CategoryPage({ params }: CategoryPageProps) {
+  const { setCategory } = useNewsStore()
+
+  useEffect(() => {
+    setCategory(params.category)
+  }, [params.category, setCategory])
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -18,10 +35,11 @@ export default function CategoryDetailPage({ params }: { params: { id: string } 
             </Link>
           </Button>
         </div>
-        <CategoryContent id={params.id} />
+        <CategoryContent id={params.category}>
+          <NewsFeed />
+        </CategoryContent>
       </main>
       <AudioPlayer />
     </div>
   )
 }
-
