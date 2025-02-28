@@ -1,131 +1,61 @@
-let Redis;
-if (typeof window === 'undefined') {
-  Redis = require('ioredis').Redis;
-}
+import { Redis } from '@upstash/redis';
+import { createClient } from 'redis';
 
-import config from './config';
+let redis: Redis | any
 
-// Check if we're running on the server side
-const isServer = typeof window === 'undefined';
+// Add a fallback mechanism when Redis is unavailable
+let redisAvailable = false;
 
-class RedisClient {
-  private static instance: any = null;
-  private static retryCount = 0;
-  private static readonly MAX_RETRIES = 5;
-
-  static getInstance(): any {
-    // Only create Redis instance on server side
-    if (isServer && !this.instance) {
-      this.instance = new Redis({
-        host: config.redis.host,
-        port: config.redis.port,
-        maxRetriesPerRequest: 3,
-        // Disable DNS lookup to avoid Edge Runtime issues
-        family: 4,
-        retryStrategy: (times: number) => {
-          this.retryCount = times;
-          if (times > this.MAX_RETRIES) {
-            console.error('Max Redis reconnection attempts reached');
-            return null; // Stop retrying
-          }
-          const delay = Math.min(times * 500, 2000);
-          console.log(`Retrying Redis connection in ${delay}ms...`);
-          return delay;
-        },
-        reconnectOnError: (err: any) => {
-          const targetError = 'READONLY';
-          if (err.message.includes(targetError)) {
-            return true;
-          }
-          return false;
-        },
-      });
-
-      this.instance.on('error', (err: any) => {
-        console.error('Redis Client Error:', err);
-        if (this.retryCount >= this.MAX_RETRIES) {
-          console.error('Redis connection failed, falling back to in-memory cache');
-        }
-      });
-
-      this.instance.on('connect', () => {
-        console.log('Redis Client Connected');
-        this.retryCount = 0;
-      });
-    }
-
-    return this.instance || null;
-  }
-}
-
-// Initialize Redis client only on server side
-const redisClient = isServer ? RedisClient.getInstance() : null;
-
-// In-memory fallback cache for when Redis is unavailable
-const memoryCache = new Map<string, { data: any; expiry: number }>();
-
-export async function cacheData(key: string, data: any, expireTime = 3600): Promise<boolean> {
-  if (!redisClient) {
-    memoryCache.set(key, {
-      data,
-      expiry: Date.now() + (expireTime * 1000),
+// Try to initialize Redis client
+try {
+  if (process.env.REDIS_HOST && process.env.REDIS_PORT) {
+    // Use standard Redis client
+    redis = createClient({
+      url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`
+    })
+    
+    // Set up event handlers
+    redis.on('error', (err) => {
+      console.error('Redis client error:', err);
+      redisAvailable = false;
     });
-    return true;
+    
+    redis.on('connect', () => {
+      console.log('Redis client connected');
+      redisAvailable = true;
+    });
+    
+    // Connect to Redis
+    await redis.connect().catch(console.error)
+  } else {
+    console.warn('Redis configuration not found, caching disabled')
   }
+} catch (error) {
+  console.error('Failed to initialize Redis client:', error)
+}
 
+export async function cacheData<T>(key: string, data: T, ttl = 3600): Promise<void> {
+  if (!redis || !redisAvailable) return
+  
   try {
-    await redisClient.setex(key, expireTime, JSON.stringify(data));
-    return true;
+    await redis.set(key, JSON.stringify(data), { EX: ttl })
   } catch (error) {
-    console.warn('Redis cache failed, using memory cache:', error);
-    // Fallback to in-memory cache
-    memoryCache.set(key, {
-      data,
-      expiry: Date.now() + (expireTime * 1000),
-    });
-    return true;
+    console.error('Redis caching error:', error)
+    // Mark Redis as unavailable if we encounter an error
+    redisAvailable = false;
   }
 }
 
 export async function getCachedData<T>(key: string): Promise<T | null> {
-  if (!redisClient) {
-    const cached = memoryCache.get(key);
-    if (cached && cached.expiry > Date.now()) {
-      return cached.data;
-    }
-    if (cached) {
-      memoryCache.delete(key); // Clean up expired cache
-    }
-    return null;
-  }
-
+  if (!redis || !redisAvailable) return null
+  
   try {
-    const data = await redisClient.get(key);
-    return data ? JSON.parse(data) : null;
+    const data = await redis.get(key)
+    return data ? JSON.parse(data) : null
   } catch (error) {
-    console.warn('Redis get failed, checking memory cache:', error);
-    // Check in-memory cache
-    const cached = memoryCache.get(key);
-    if (cached && cached.expiry > Date.now()) {
-      return cached.data;
-    }
-    if (cached) {
-      memoryCache.delete(key); // Clean up expired cache
-    }
-    return null;
+    console.error('Redis retrieval error:', error)
+    // Mark Redis as unavailable if we encounter an error
+    redisAvailable = false;
+    return null
   }
 }
-
-// Clean up expired memory cache periodically
-if (isServer) {
-  setInterval(() => {
-    const now = Date.now();
-    for (const [key, value] of memoryCache.entries()) {
-      if (value.expiry <= now) {
-        memoryCache.delete(key);
-      }
-    }
-  }, 60000); // Clean up every minute
-}
-
-export default redisClient;
